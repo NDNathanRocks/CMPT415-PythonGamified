@@ -1,0 +1,30 @@
+{
+  "name": "gamified-learning",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.4.5",
+    "axios": "^0.27.2",
+    "bootstrap": "^5.1.3",
+    "firebase": "^9.8.2",
+    "formik": "^2.2.9",
+    "next": "12.1.6",
+    "react": "18.1.0",
+    "react-bootstrap": "^2.4.0",
+    "react-dom": "18.1.0",
+    "react-loading-skeleton": "^3.1.0",
+    "react-syntax-highlighter": "^15.5.0",
+    "uuid": "^8.3.2",
+    "validator": "^13.7.0"
+  },
+  "devDependencies": {
+    "eslint": "8.16.0",
+    "eslint-config-next": "12.1.6"
+  }
+}

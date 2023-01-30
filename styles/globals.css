@@ -1,0 +1,246 @@
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.form-signin .checkbox {
+  font-weight: 400;
+}
+
+.form-signin .form-control {
+  position: relative;
+  box-sizing: border-box;
+  height: auto;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Achievement Styles */
+.achievement-list {
+  list-style-type: none;
+  padding: 0;
+  text-align: center;
+}
+
+.achievement-list li {
+  margin-bottom: 1em;
+}
+
+.achievement-icon {
+  font-size: 48px;
+}
+
+.achievement-text {
+  color: rgb(120, 120, 120);
+  display: block;
+  font-size: smaller;
+}
+
+/* Profile Modules Styles */
+.profile-modules-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.profile-modules-list li {
+  margin-bottom: 1em;
+}
+
+.profile-modules-title {
+  font-size: larger;
+  font-weight: bold;
+}
+
+.profile-modules-description {
+  display: block;
+}
+
+.profile-modules-title-locked {
+  opacity: 0.5;
+}
+
+/* Main Modules Styles */
+.modules-locked {
+  opacity: 0.5;
+}
+
+.modules-buttons .btn {
+  margin-right: 1em;
+}
+
+.modules-completion-suggestion {
+  font-weight: bold;
+}
+
+/* Competition */
+.competition-card-disabled {
+  opacity: 0.5;
+}
+
+/* Discussion */
+.discussion-reply {
+  margin-left: 2em;
+  margin-top: 1em;
+}
+
+.discussion-tag {
+  border-radius: 5px;
+  background-color: azure;
+  text-decoration: none;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+/* Module Questions */
+
+#mc-question-box {
+  padding: 1.5em;
+  border-radius: 1em;
+  background-color: rgb(243, 249, 255);
+  margin-bottom: 2em;
+  margin-top: 2em;
+}
+
+#question-correct {
+  background-color: rgb(241, 255, 244);
+}
+
+#question-incorrect {
+  background-color: rgb(255, 241, 241);
+}
+
+#mc-question-box h3 {
+  font-size: 16px;
+}
+
+.module-image {
+  text-align: center;
+}
+
+.btn-group-editor-run {
+  margin-top: 2em;
+  float: right;
+}
+
+.b-r {
+  border-right: thin black solid;
+  height: 100vh;
+  overflow: auto;
+}
+
+.editor-output .output ul li {
+  list-style-type: none;
+}
+
+.editor-output .output ul {
+  padding: 0;
+}
+
+.editor-output .output {
+  padding: 1.5em;
+  border-radius: 1em;
+  background-color: rgb(243, 249, 255);
+}
+
+.editor-output .output h3 {
+  font-size: 16px;
+}
+
+/* Achievements */
+.achievement {
+  margin-bottom: 1em;
+}
+
+.achievement-emoji {
+  font-size: 48px;
+  display: block;
+}
+
+.achievement-text {
+  color: rgb(120, 120, 120);
+  display: block;
+  font-size: smaller;
+}
+
+/* Toast */
+
+.toast {
+  position: fixed;
+  top: 0;
+  right: 0;
+  margin: 4em 2em;
+  z-index: 1000;
+  display: block !important;
+}
+
+.toast-close {
+  right: 0;
+  float: right;
+  margin-right: 5px;
+  position: absolute;
+}
+
+/* Code challenge box */
+.code-challenge-box {
+  padding: 1.5em;
+  border-radius: 1em;
+  background-color: rgb(243, 249, 255);
+  margin-bottom: 2em;
+}
+
+.code-challenge-box h3 {
+  font-size: 16px;
+}
+
+/* Personalization box */
+.personalization-box {
+  padding: 1.5em;
+  border-radius: 1em;
+  background-color: rgb(243, 249, 255);
+}
+
+.personalization-box h3 {
+  font-size: 16px;
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+.personalization-box p {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.personalization-box .btn-group {
+  width: 100%;
+}
+
+.personalization-box .btn-group button {
+  margin: 0 auto;
+}
+
+.radio-group {
+  margin-left: 1em;
+}
+
+.radio-group .form-check-label {
+  margin-left: 0.5em;
+  font-size: 16px;
+}

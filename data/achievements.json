@@ -1,0 +1,16 @@
+{
+    "achievements": [
+        {
+            "id": 1,
+            "description": "Answered a multiple choice question correctly.",
+            "emoji": "🧑‍🎓",
+            "score": 100
+        },
+        {
+            "id": 2,
+            "description": "Used an anonymous name.",
+            "emoji": "🕵️",
+            "score": 0
+        }
+    ]
+}
