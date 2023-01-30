@@ -3,6 +3,7 @@ import Context from '../context/Context'
 import NavComponent from '../components/NavComponent'
 import LoginComponent from '../components/LoginComponent'
 import ModulesComponent from '../components/ModulesComponent'
+import HomePageComponent from '../components/HomePageComponent'
 import { Pages } from '../context/Pages'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import ProfileComponent from '../components/ProfileComponent'
@@ -59,7 +60,7 @@ export default function Home() {
   }, [page, profileView, openedModule])
 
   if (user) {
-    let currentPage = (<ModulesComponent></ModulesComponent>)
+    let currentPage = (<HomePageComponent></HomePageComponent>)
 
     if (page === Pages.PROFILE) {
       currentPage = (<ProfileComponent></ProfileComponent>)
