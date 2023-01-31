@@ -1,10 +1,16 @@
 import handleModuleStart from '../OpenModuleComponent'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { library } from '@fortawesome/fontawesome-svg-core'
 
 export default function ConditionalsModule() {
+    library.add(fab, fas, far)
     return (
         <div class="card">
-            <img src="./images/loops.png" class="card-img-top p-3" alt="loops.png"></img>
             <div class="card-body">
+                <h1 class="d-flex justify-content-center mb-3"><FontAwesomeIcon icon="fa-solid fa-rotate-left" /></h1>
                 <h5 class="card-title">Loops</h5>
                 <p class="card-text">This module covers while loops and for loops.</p>
                 <span className="profile-modules-progress">
