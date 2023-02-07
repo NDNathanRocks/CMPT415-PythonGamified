@@ -7,6 +7,7 @@ import Context from '../context/Context'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
+import { faCropSimple } from '@fortawesome/free-solid-svg-icons'
 
 /**
  * Component for a module's contents and multiple choice questions.
@@ -248,7 +249,8 @@ function OpenModuleComponent(props) {
         }
 
         // get all id's from personalization
-        const personalizationIds = personalization.challenges || []
+        // const personalizationIds = personalization.challenges || []
+        const personalizationIds = []
 
         // loop through each element in the module body
         for (let i = 0; i < moduleBody.length; i++) {
@@ -506,7 +508,7 @@ function OpenModuleComponent(props) {
             {showPersonalization ? <PersonalizationComponent onClickYes={_ => setModulePersonalization(true)} onClickNo={_ => setModulePersonalization(false)} message="Do you want to see some lecture material on this topic?" /> : <></>}
             {elements}
             {questionsForm}
-            <div className="code-challenge-box">
+            {/* <div className="code-challenge-box">
                     <h3>Coding Challenge</h3>
                     <p>Would you like to start a coding challenge? Completing a coding challenge is optional, but can earn you achievements and/or points.</p>
                     <div class="btn-group" role="group">
@@ -518,7 +520,7 @@ function OpenModuleComponent(props) {
                 <ul className="pagination justify-content-center">
                     {pagination}
                 </ul>
-            </nav>
+            </nav> */}
         </div>
     )
 }
