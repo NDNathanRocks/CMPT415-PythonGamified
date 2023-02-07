@@ -18,17 +18,21 @@ export default function HomePageComponent() {
                     <div className="flex-shrink-1">
                         <h5 class="mt-2 mb-4">12 <FontAwesomeIcon icon="fa-solid fa-coins" /></h5>
                     </div>
-       
             </div>
-            <div class="mb-4">
-                <BadgesComponent></BadgesComponent>
-            </div>
-            <div className="row">
-                <div className="col">
-                    <h3 class="mb-3">Topics</h3>
+            <div class="d-flex flex-row justify-content-between">
+                <div className="flex-grow-1">
+                    <div className="row">
+                        <div className="col">
+                            <h3 class="mb-3">Topics</h3>
+                        </div>
+                    </div>
+                    <ModulesListComponent></ModulesListComponent>
+                </div>
+                
+                <div className="ps-5 mt-5">
+                    <BadgesComponent></BadgesComponent>
                 </div>
             </div>
-            <ModulesListComponent></ModulesListComponent>
         </div>
     )
 }
