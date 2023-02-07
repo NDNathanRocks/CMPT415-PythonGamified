@@ -1,4 +1,4 @@
-import handleModuleStart from '../OpenModuleComponent'
+import handleModuleStart from '../ModulesComponent'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
