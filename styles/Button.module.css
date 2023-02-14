@@ -1,0 +1,45 @@
+
+.box
+{
+    width: 335px;
+}
+.box h2
+{
+    color: #f6f6f6;
+    background: #ab47bc;
+    padding: 20px 30px;
+    font-size: 20px;
+    font-weight: 700;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    width: 300px;
+    margin: 0px;
+}
+
+.box ul
+{
+    position: relative;
+    background: #fff;
+    padding: 0px;
+}
+
+.box ul li
+{
+    list-style: none;
+    font-size: 20px;
+    padding: 20px;
+    width: 300px;
+    background: #fff;
+    box-shadow: 0 5px 25px rgba(0,0,0,.1);
+    transition: transform 0.5s;
+}
+
+.box ul li:hover
+{
+    transform: scale(1,1);
+    z-index: 100;
+    background: #25c1ff;
+    box-shadow: 0 5px 25px rgba(0,0,0,.1);
+    color: #fff;
+}
+

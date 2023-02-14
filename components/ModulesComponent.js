@@ -6,6 +6,7 @@ import OpenModuleComponent from './OpenModuleComponent'
 import EditorComponent from './EditorComponent'
 import EasyEditorComponent from './EasyEditorComponent'
 import LeaderboardComponent from './LeaderboardComponent'
+import Landing from './Landing'
 
 /**
  * Component for a module and the list of modules.
@@ -36,23 +37,15 @@ export default function ModulesComponent() {
      * Returns the editor for the module.
      * Can be either an EasyEditorComponent or an EditorComponent.
      */
-    const getEditor = () => {
-        if (editorState === 0) {
-            return (<></>)
-        } else if (editorState === 1) {
-            return (
-                <div className="col-5 position-fixed b-r" style={{right: 0}}>
-                    <EditorComponent />
-                </div>
-            )
-        } else if (editorState === 2) {
-            return (
-                <div className="col-5 position-fixed b-r" style={{right: 0}}>
-                    <EasyEditorComponent />
-                </div>
-            )
-        }
-    }
+     const getEditor = () => {
+        if (editorState === 1) {
+               return (
+                   <div className="col-130 position-fixed b-re editor-back" style={{right: 0}}>
+                       <Landing/>
+                   </div>
+               )
+           }
+       }
 
     if (openedModule) {
         return (
@@ -64,6 +57,7 @@ export default function ModulesComponent() {
                     {getEditor()}
                 </div>
             </div>
+        // </div>
         )
     } else {
         return (

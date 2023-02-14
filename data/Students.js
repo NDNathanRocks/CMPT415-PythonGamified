@@ -8,7 +8,7 @@ import { Friendship } from '../context/Friendship'
  * @typedef {Object} Student
  */
 export class Student {
-    constructor(uuid, name, email, anonymousName, isAnonymous, achievements, level, friends, score) {
+    constructor(uuid, name, email, anonymousName, isAnonymous, achievements, level, friends, score, solved_question) {
         this.uuid = uuid
         this.name = name
         this.email = email
@@ -18,6 +18,7 @@ export class Student {
         this.level = level
         this.friends = friends
         this.score = score
+        this.solved_question = []
     }
 }
 
@@ -36,12 +37,13 @@ const studentConverter = {
             achievements: student.achievements,
             level: student.level,
             friends: student.friends,
-            score: student.score
+            score: student.score,
+            solved_question : student.solved_question
         }
     },
     fromFirestore: function (snapshot, options) {
         const data = snapshot.data(options)
-        return new Student(data.uuid, data.name, data.email, data.anonymous_name, data.is_anonymous, data.achievements, data.level, data.friends, data.score)
+        return new Student(data.uuid, data.name, data.email, data.anonymous_name, data.is_anonymous, data.achievements, data.level, data.friends, data.score, data.solved_question)
     }
 }
 
@@ -152,6 +154,29 @@ export async function giveStudentAchievement(student, achievement) {
 /**
  * Adds to a student's score
  * @param {Student} student 
+ * @returns {Boolean} true if score was successfully changed, false otherwise
+ */
+ export async function getStudentScore(student) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentScore = studentData.score
+
+    return String(currentScore)
+}
+
+
+/**
+ * Adds to a student's score
+ * @param {Student} student 
  * @param {Number} score 
  * @returns {Boolean} true if score was successfully changed, false otherwise
  */
@@ -173,6 +198,150 @@ export async function giveStudentScore(student, score) {
 
     return true
 }
+
+/**
+ * Adds to a student's score
+ * @param {Student} student 
+ * @param {Number} score 
+ * @returns {Boolean} true if score was successfully changed, false otherwise
+ */
+ export async function takeStudentScore(student, score) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentScore = studentData.score
+
+    await updateDoc(studentDoc.ref, { score: currentScore - score })
+
+    return true
+}
+
+
+/**
+ * Adds to a student's score
+ * @param {Student} student 
+ * @param {Number} score 
+ * @returns {Boolean} true if score was successfully changed, false otherwise
+ */
+ export async function solvedQuestionUpdate(student, title, questionNumber) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+    console.log("1")
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentQuestion = studentData.solved_question
+    const len = currentQuestion.length
+    var flag = false
+    var num = -1
+    console.log("length", len)
+    for (let i = 0; i < len; i++) {
+        if (currentQuestion[i]['title'] == title) {
+            console.log("2")
+            flag = true
+            num = i
+        }
+    }
+    if (flag) {
+        console.log("here2222")
+        console.log(currentQuestion[num]['l'])
+        console.log("question", questionNumber)
+        for(let i = 0; i < currentQuestion[num]['l'].length; i++) {
+            if(currentQuestion[num]['l'][i] == questionNumber) {
+                // console.log("3")
+                return true
+            }
+            else {
+                console.log("HIHIHI 4")
+                currentQuestion[num]['l'].push(questionNumber)
+                console.log(currentQuestion[num]['l'])
+                await updateDoc(studentDoc.ref, { solved_question: currentQuestion })
+                return true
+            }
+        }
+        // if (questionNumber in currentQuestion[num]['l']) {
+        //     console.log("3")
+        //     return true
+        // }
+
+    }
+    else {
+        console.log("here3333")
+        const l = [questionNumber]
+        currentQuestion.push({
+            title, l
+        })
+        await updateDoc(studentDoc.ref, { solved_question: currentQuestion })
+        return true
+    }
+    // console.log("heeeee")
+    // console.log(currentQuestion)
+    // await updateDoc(studentDoc.ref, { solved_question: currentQuestion })
+    // console.log(studentData.solved_question)
+    return false
+}
+
+/**
+ * Adds to a student's score
+ * @param {Student} student 
+ * @param {Number} score 
+ * @returns {Boolean} true if score was successfully changed, false otherwise
+ */
+ export async function solvedQuestionCheck(student, title, questionNumber) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentQuestion = studentData.solved_question
+    // console.log("current", currentQuestion[0]['l'][3])
+    const len = currentQuestion.length
+    var flag = false
+    var num = -1
+    // console.log("length", len)
+    for (let i = 0; i < len; i++) {
+        if (currentQuestion[i]['title'] == title) {
+            flag = true
+            num = i
+        }
+    }
+    if (flag) {
+        var check = false
+        for(let i = 0; i < currentQuestion[num]['l'].length; i++) {
+            if (questionNumber == currentQuestion[num]['l'][i]) {
+                check = true
+            } 
+        }
+        if (check) {
+            return true
+        }
+        else {
+            return false
+        }
+    }
+    return false
+}
+
+
 
 /**
  * Returns ids of all students the user has the status with
@@ -283,4 +452,77 @@ export async function getStudentAnswers(student, question) {
     } else {
         console.log("No such document!")
     }
+}
+
+
+/**
+ * Adds to a student's score
+ * @param {Student} student 
+ * @param {Number} score 
+ * @returns {Boolean} true if score was successfully changed, false otherwise
+ */
+ export async function giveStudentScoreCode(email, score) {
+    const q = query(collection(db, "students"), where("email", "==", email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentScore = studentData.score
+
+    await updateDoc(studentDoc.ref, { score: currentScore + score })
+
+    return true
+}
+
+/**
+ * Adds to a student's score
+ * @param {Student} student 
+ * @param {Number} score 
+ * @returns {Boolean} true if score was successfully changed, false otherwise
+ */
+ export async function takeStudentScoreCode(email, score) {
+    const q = query(collection(db, "students"), where("email", "==", email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentScore = studentData.score
+
+    await updateDoc(studentDoc.ref, { score: currentScore - score })
+
+    return true
+}
+
+/**
+ * Adds to a student's score
+ * @param {Student} student 
+ * @returns {Boolean} true if score was successfully changed, false otherwise
+ */
+ export async function getStudentScoreCode(email) {
+    const q = query(collection(db, "students"), where("email", "==", email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentScore = studentData.score
+
+    return String(currentScore)
 }

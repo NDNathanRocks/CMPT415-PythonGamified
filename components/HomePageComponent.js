@@ -63,14 +63,11 @@ export default function HomePageComponent() {
 
     if (openedModule) {
         return (
-            <div class="d-flex flex-row justify-content-between">
-                <SideBar></SideBar>
-                <div className="row flex-grow-1">
-                    <div className={editorState === 0 ? "col-100" : "col-7"}>
-                        <OpenModuleComponent file={openedModule} />
-                    </div>
-                    {getEditor()}
+            <div>
+                <div className={editorState === 0 ? "col-100" : "col-7"}>
+                    <OpenModuleComponent file={openedModule} />
                 </div>
+                {getEditor()}
             </div>
         )
     } else {
