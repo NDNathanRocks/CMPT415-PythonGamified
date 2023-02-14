@@ -19,6 +19,11 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswor
 import { auth } from '../firebase'
 import { v4 } from 'uuid'
 import { Quiz } from '../data/Quiz'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { library } from '@fortawesome/fontawesome-svg-core'
 
 
 /**
@@ -27,6 +32,7 @@ import { Quiz } from '../data/Quiz'
  * @returns HTML for a module's contents.
  */
 function OpenModuleComponent(props) {
+    library.add(fab, fas, far)
     const moduleJson = props.file.json
 
     const moduleName = props.file.id
@@ -213,10 +219,6 @@ function OpenModuleComponent(props) {
             var menu1 = document.getElementById("menu1")
             var menu2 = document.getElementById("menu2")
             var menu3 = document.getElementById("menu3")
-            // var menu4 = document.getElementById("menu4")
-            // var menu5 = document.getElementById("menu5")
-            // var menu6 = document.getElementById("menu6")
-            // var menu7 = document.getElementById("menu7")
             var menu = [menu1, menu2, menu3]
             menu[page].classList = "active"
             for (let i = 0; i < menu.length; i++) {
@@ -252,7 +254,6 @@ function OpenModuleComponent(props) {
         // document.getElementById("radio-check").checked = false
         // const radioButtons = document.querySelectorAll('input[id="radio-check"]')
         // radioButtons.checked = false
-        console.log("hahaha")
         refreshFormik()
         resetForm()
         // let radios = document.getElementsByTagName('radio-check');
@@ -264,7 +265,6 @@ function OpenModuleComponent(props) {
         //     }
         // // }
         // }
-        document.getElementById("prev22").style.visibility = "hidden"
         // if selected page is quiz, then keep it into quiz
         if (page == 0 || page == 1 || page == 2) {
             menu_select(1)
@@ -413,8 +413,8 @@ function OpenModuleComponent(props) {
                 <div id = "mc-question-box-content">
                 <h2>Hint</h2>
                 {divs}
+                <button id = "hide_hint" className = "btn btn-success btn-block" onClick= {hide_hint2} >Hide hint</button>
                 </div>
-                <button id = "hide_hint" className = "btn btn-success btn-lg btn-block" onClick= {hide_hint2}>Hide hint</button>
             </div>
         )
         setQuestions(tempQuestions)
@@ -592,7 +592,6 @@ function OpenModuleComponent(props) {
         questionsForm = (
             <div id="mc-question-box">
                 <h3>Multiple-Choice Question</h3>
-                {/* <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button> */}
                 <div class = "code-toolbox">
                 <form onSubmit={formik.handleSubmit}>
                     {
@@ -630,6 +629,7 @@ function OpenModuleComponent(props) {
                         </div>
                         <div className="col">
                             <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
+                            <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
                         </div>
                     </div>
                 </form>
@@ -668,8 +668,6 @@ function OpenModuleComponent(props) {
             setModulePersonalization(true)
             document.getElementById("mc-question-box3").style.display = "none";
             document.getElementById("mc-question-box2").style.display = "block";
-            document.getElementById("prev1").style.visibility = "hidden"
-            document.getElementById("prev22").style.visibility = "hidden"
             document.getElementById("hide_hint").style.visibility = "hidden"
         }
 
@@ -702,7 +700,6 @@ function OpenModuleComponent(props) {
                         console.log("here")
                         document.getElementById("mc-question-box3").style.display = "none";
                         document.getElementById("mc-question-box2").style.display = "block";
-                        document.getElementById("prev1").style.visibility = "hidden"
                     }
                     else {
                         if(point >= 10) {
@@ -716,7 +713,6 @@ function OpenModuleComponent(props) {
                         console.log("here")
                         document.getElementById("mc-question-box3").style.display = "none";
                         document.getElementById("mc-question-box2").style.display = "block";
-                        document.getElementById("prev1").style.visibility = "hidden"
                         }
                         else {
                             setToast({
@@ -755,7 +751,6 @@ function OpenModuleComponent(props) {
         if (document.getElementById("page_number")!=null) {
             document.getElementById("page_number").style.visibility = "visible"
         }
-        document.getElementById("prev1").style.visibility = "hidden"
         // {pagination}
     }
 
@@ -771,7 +766,6 @@ function OpenModuleComponent(props) {
 
     const show_related = () => {
         console.log("here")
-        document.getElementById("prev22").style.visibility = "visible"
     }
 
     function show_point() {
@@ -999,196 +993,61 @@ function OpenModuleComponent(props) {
     }
 
     return (
-        <div className = "big_box">
-            <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"></link>
-            <div class="wrapper">
-                <div class="sidebar">
-                <ul>
-                <li>
-                    <a href="#" class="active" id = "menu1">
-                        <span class="icon"><i class="fas fa-stream"></i></span>
-                        <span class="item" onClick = {() => menu_select(0)}>Learning Material</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" id = "menu2" onClick = {() => menu_select(1)}>
-                        <span class="icon"><i class="far fa-question-circle"></i></span>
-                        <span class="item" onClick={() => handlePageChange(0, formik.resetForm)}>Quiz</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" id = "menu3" onClick = {() => menu_select(2)}>
-                        <span class="icon"><i class="fas fa-link"></i></span>
-                        <span class="item" onClick={() => openCodingChallenge(1)}>Coding Challenge</span>
-                    </a>
-                </li>
-                {/* <div id = "quiz_list" class = "quiz_list3">
-                    <br></br>
-                    <li>
-                        <span id = "quiz1" class = "quiz_list"> {question_solve_check1()} </span>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(0)}></h1>
-                        <span id = "question1_check" class = "quiz_list1"></span>
-                        <button class="quiz_list" onClick = {() => handlePageChange(0, formik.resetForm)}>Question1</button>
+        <div class="d-flex flex-row">
+            <div class="bg-primary text-dark bg-opacity-25 rounded ps-2 pt-4 me-5 mb-4">
+                <div>
+                    <div class="d-flex flex-row justify-content-between rounded sidebar_row px-4 py-2"  id="menu2">
+                        <div class="d-flex flex-row justify-content-between">
+                            <h5>Quiz</h5>
+                            <h5 class="ms-2"><FontAwesomeIcon icon="fa-regular fa-pen-to-square" /></h5>
                         </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(1)}></h1>
-                        <div id = "question2_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(1, formik.resetForm)}>Question2</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(2)}></h1>
-                        <div id = "question3_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(2, formik.resetForm)}>Question3</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(3)}></h1>
-                        <div id = "question4_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(3, formik.resetForm)}>Question4</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(4)}></h1>
-                        <div id = "question5_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(4, formik.resetForm)}>Question5</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(5)}></h1>
-                        <div id = "question6_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(5, formik.resetForm)}>Question6</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(6)}></h1>
-                        <div id = "question7_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(6, formik.resetForm)}>Question7</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(7)}></h1>
-                        <div id = "question8_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(7, formik.resetForm)}>Question8</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(8)}></h1>
-                        <div id = "question9_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(8, formik.resetForm)}>Question9</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(9)}></h1>
-                        <div id = "question10_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(9, formik.resetForm)}>Question10</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(10)}></h1>
-                        <div id = "question11_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(10, formik.resetForm)}>Question11</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(11)}></h1>
-                        <div id = "question12_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(11, formik.resetForm)}>Question12</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(12)}></h1>
-                        <div id = "question13_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(12, formik.resetForm)}>Question13</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(13)}></h1>
-                        <div id = "question14_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(13, formik.resetForm)}>Question14</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(14)}></h1>
-                        <div id = "question15_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(14, formik.resetForm)}>Question15</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(15)}></h1>
-                        <div id = "question16_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(15, formik.resetForm)}>Question16</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(16)}></h1>
-                        <div id = "question17_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(16, formik.resetForm)}>Question17</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(17)}></h1>
-                        <div id = "question18_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(17, formik.resetForm)}>Question18</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(18)}></h1>
-                        <div id = "question19_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(18, formik.resetForm)}>Question19</button>
-                        </div>
-                        <div class="input-group">
-                        <h1 onload = {checking_solved(19)}></h1>
-                        <div id = "question20_check" class ="quiz_list1"></div>
-                        <button class="quiz_list" onClick = {() => handlePageChange(19, formik.resetForm)}>Question20</button>
-                        </div>
-                    </li>
-                </div> */}
-                {/* <li>
-                    <a href="#" id = "menu4" onClick = {() => menu_select(3)}>
-                        <span class="icon"><i class="far fa-question-circle"></i></span>
-                        <span class="item" onClick={() => handlePageChange(1)}>Quiz 2</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" id = "menu5" onClick = {() => menu_select(4)}>
-                        <span class="icon"><i class="far fa-question-circle"></i></span>
-                        <span class="item" onClick={() => handlePageChange(2)}>Quiz 3</span>
-                    </a>
-                </li> */}
-                {/* <li>
-                    <a href="#" id = "menu6" onClick = {() => menu_select(5)}>
-                        <span class="icon"><i class="fas fa-link"></i></span>
-                        <span class="item">Coding Competition 1</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="#" id = "menu7" onClick = {() => menu_select(6)}>
-                        <span class="icon"><i class="fas fa-link"></i></span>
-                        <span class="item">Coding Competition 2</span>
-                    </a>
-                </li> */}
-                </ul>
-            
-            <div className = "quiz_box">
-            <br></br>
-            <div className = "quiz_inner_box">
-            <h1>{getPageTitle(currentPage)}</h1>
-            <h5>Question {currentPage + 1}/{moduleJson.body.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
-            {/* {showPersonalization ? <PersonalizationComponent onClickYes={show_hint} onClickNo={_ => setModulePersonalization(false)} message="Do you want to see some lecture material on this topic?" /> : <></>} */}
-            <div onload = {show_point()}>
-            <div id = "p" className = "point"></div>
-            <div className = "pointdescription">You need 10 points to use Hint for this question.</div>
-            </div>
-            {/* {show_point()} */}
-            <button className="button8" type="submit" onClick= {show_hint2}>Hint</button>
-            <div id="mc-question-box3"></div>
-            {elements}
-            {questionsForm}
-            <div class="prev12" href="#" id = "prev22" onClick= {show_hint}>Related Learning Material</div>
-            <div class="prev1" href="#" id = "prev1" onClick= {hide_hint}>Go back to question</div>
-
-            {/* <div className="code-challenge-box">
-                    <h3>Coding Challenge</h3>
-                    <p>Would you like to start a coding challenge? Completing a coding challenge is optional, but can earn you achievements and/or points.</p>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-success" onClick={() => openCodingChallenge(2)}>Easier (Fill-in-the-Blanks)</button>
-                        <button type="button" class="btn btn-warning" onClick={() => openCodingChallenge(1)}>Harder (Code Everything)</button>
+                        <h5 class="ms-5"><FontAwesomeIcon icon="fa-solid fa-chevron-right"/></h5>
                     </div>
-                </div> */}
-            <nav>
-                <ul className="pagination justify-content-center">
-                    {pagination}
-                </ul>
-            </nav>
-        </div>
-        </div>
-        </div>
-        </div>
+                    <div class="d-flex flex-row justify-content-between rounded sidebar_row px-4 py-2" id="menu3">
+                        <div class="d-flex flex-row justify-content-between">
+                            <h5>Challenge</h5>
+                            <h5 class="ms-2"><FontAwesomeIcon icon="fa-solid fa-brain" /></h5>
+                        </div>
+                        <h5 class="ms-5"><FontAwesomeIcon icon="fa-solid fa-chevron-right"/></h5>
+                    </div>
+                </div>
+                <div id = "quiz_list" class = "quiz_list3">
+                </div> 
+            </div>
+            <div className="row flex-grow-1">  
+                <div className = "quiz_box">
+                    <br></br>
+                    <div className = "quiz_inner_box">
+                        <h1>{getPageTitle(currentPage)}</h1>
+                        <h5>Question {currentPage + 1}/{moduleJson.body.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
+                        {/* {showPersonalization ? <PersonalizationComponent onClickYes={show_hint} onClickNo={_ => setModulePersonalization(false)} message="Do you want to see some lecture material on this topic?" /> : <></>} */}
+                        <div onload = {show_point()}>
+                        <div id = "p" className = "point"></div>
+                        <div className = "pointdescription">You need 10 points to use Hint for this question.</div>
+                        </div>
+                        {/* {show_point()} */}
+                        <button className="button8" type="submit" onClick= {show_hint2}>Hint</button>
+                        <div id="mc-question-box3"></div>
+                        {elements}
+                        {questionsForm}
+
+                        {/* <div className="code-challenge-box">
+                                <h3>Coding Challenge</h3>
+                                <p>Would you like to start a coding challenge? Completing a coding challenge is optional, but can earn you achievements and/or points.</p>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-success" onClick={() => openCodingChallenge(2)}>Easier (Fill-in-the-Blanks)</button>
+                                    <button type="button" class="btn btn-warning" onClick={() => openCodingChallenge(1)}>Harder (Code Everything)</button>
+                                </div>
+                            </div> */}
+
+                        {/* <nav>
+                            <ul className="pagination justify-content-center">
+                                {pagination}
+                            </ul>
+                        </nav> */}
+                    </div>
+                </div>
+            </div>
         </div>
     )
 }
