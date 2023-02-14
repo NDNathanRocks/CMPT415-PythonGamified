@@ -53,6 +53,16 @@ export default function NavComponent(props) {
         setPage(Pages.DISCUSSION)
     }
 
+    /**
+     * Handles the editor board being opened.
+     * @param {*} e 
+     */
+     const handleEditorClick = (e) => {
+        e.preventDefault()
+        setOpenedModule(null)
+        setPage(Pages.EDITOR)
+    }
+
     const checkIfActive = (pageName) => {
         if (page === pageName) {
             return ' active'
