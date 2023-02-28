@@ -63,11 +63,14 @@ export default function HomePageComponent() {
 
     if (openedModule) {
         return (
-            <div>
-                <div className={editorState === 0 ? "col-100" : "col-7"}>
+            <div class="d-flex flex-row justify-content-between">
+                <div className={editorState === 0 ? "flex-grow-1 col-100" : "flex-grow-1 col-7"}>
                     <OpenModuleComponent file={openedModule} />
                 </div>
                 {getEditor()}
+                <div className="px-5 mt-5">
+                    <BadgesComponent></BadgesComponent>
+                </div>
             </div>
         )
     } else {

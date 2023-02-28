@@ -410,11 +410,11 @@ function OpenModuleComponent(props) {
         let divs2 = null
         divs2 = (
             <div id="mc-question-box2">
-                <div id = "mc-question-box-content">
+                {/* <div id = "mc-question-box-content">
                 <h2>Hint</h2>
                 {divs}
                 <button id = "hide_hint" className = "btn btn-success btn-block" onClick= {hide_hint2} >Hide hint</button>
-                </div>
+                </div> */}
             </div>
         )
         setQuestions(tempQuestions)
@@ -610,7 +610,7 @@ function OpenModuleComponent(props) {
                         })
                     }
                     <br />
-                    <div className="row">
+                    <div className="row d-flex align-items-end">
                         <div className="col">
                             <div role="group">
                             {
@@ -625,7 +625,14 @@ function OpenModuleComponent(props) {
                             }
                             </div>
                             <br/>
-                            <button className="btn btn-success btn-lg btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
+                            <button className="btn btn-success btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
+                        </div>
+                        <div className="col">
+                            <div onload = {show_point()}>
+                                <div id = "p" className = "point"></div>
+                                <div className = "pointdescription">10 Coins are need to use a hint.</div>
+                            </div>
+                            <button className="btn btn-warning mt-3" type="button">Hint</button>
                         </div>
                         <div className="col">
                             <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
@@ -657,8 +664,6 @@ function OpenModuleComponent(props) {
             json: content
         })
     }
-
-    // const pt = show_point()
     
         /**
      * Sends an email to the user with a link to reset their password
@@ -670,10 +675,6 @@ function OpenModuleComponent(props) {
             document.getElementById("mc-question-box2").style.display = "block";
             document.getElementById("hide_hint").style.visibility = "hidden"
         }
-
-
-
-    // const pt = show_point()
     
         /**
      * Sends an email to the user with a link to reset their password
@@ -770,7 +771,7 @@ function OpenModuleComponent(props) {
 
     function show_point() {
         currentScore.then((value) => {
-            document.getElementById('p').innerHTML = 'Current point : ' + value+'</p>';
+            document.getElementById('p').innerHTML =  'Current Coins: ' + value + ' </p>';
         });
     }
     /**
@@ -1021,13 +1022,6 @@ function OpenModuleComponent(props) {
                         <h1>{getPageTitle(currentPage)}</h1>
                         <h5>Question {currentPage + 1}/{moduleJson.body.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
                         {/* {showPersonalization ? <PersonalizationComponent onClickYes={show_hint} onClickNo={_ => setModulePersonalization(false)} message="Do you want to see some lecture material on this topic?" /> : <></>} */}
-                        <div onload = {show_point()}>
-                        <div id = "p" className = "point"></div>
-                        <div className = "pointdescription">You need 10 points to use Hint for this question.</div>
-                        </div>
-                        {/* {show_point()} */}
-                        <button className="button8" type="submit" onClick= {show_hint2}>Hint</button>
-                        <div id="mc-question-box3"></div>
                         {elements}
                         {questionsForm}
 
