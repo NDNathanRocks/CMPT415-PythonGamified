@@ -19,6 +19,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswor
 import { auth } from '../firebase'
 import { v4 } from 'uuid'
 import { Quiz } from '../data/Quiz'
+import { Pages } from '../context/Pages'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
@@ -38,7 +39,7 @@ function OpenModuleComponent(props) {
     const moduleName = props.file.id
 
     // Context: user, editor state, challenge data, personalization, toast
-    const { user, setEditorState, setChallengeData, personalization, setPersonalization, setToast } = useContext(Context)
+    const { user, page, setPage, setEditorState, setChallengeData, personalization, setPersonalization, setToast } = useContext(Context)
 
     const currentScore = getStudentScore(user)
 
@@ -441,6 +442,16 @@ function OpenModuleComponent(props) {
             editorType = 2
         
         setEditorState(editorType)
+        setPage(Pages.EDITOR)
+
+        document.getElementById("quiz_box").style.display = "none";
+    }
+
+    const openQuiz = () => {
+        console.log("here in openQuiz")
+        setEditorState(0)
+
+        document.getElementById("quiz_box").style.display = "block";
     }
 
     /**
@@ -998,14 +1009,14 @@ function OpenModuleComponent(props) {
             <div class="bg-primary text-dark bg-opacity-25 rounded ps-2 pt-4 me-5 mb-4">
                 <div>
                     <div class="d-flex flex-row justify-content-between rounded sidebar_row px-4 py-2"  id="menu2">
-                        <div class="d-flex flex-row justify-content-between">
+                        <div class="d-flex flex-row justify-content-between" onClick={() => openQuiz()}>
                             <h5>Quiz</h5>
                             <h5 class="ms-2"><FontAwesomeIcon icon="fa-regular fa-pen-to-square" /></h5>
                         </div>
                         <h5 class="ms-5"><FontAwesomeIcon icon="fa-solid fa-chevron-right"/></h5>
                     </div>
                     <div class="d-flex flex-row justify-content-between rounded sidebar_row px-4 py-2" id="menu3">
-                        <div class="d-flex flex-row justify-content-between">
+                        <div class="d-flex flex-row justify-content-between" onClick={() => openCodingChallenge(1)}>
                             <h5>Challenge</h5>
                             <h5 class="ms-2"><FontAwesomeIcon icon="fa-solid fa-brain" /></h5>
                         </div>
@@ -1015,7 +1026,7 @@ function OpenModuleComponent(props) {
                 <div id = "quiz_list" class = "quiz_list3">
                 </div> 
             </div>
-            <div className="row flex-grow-1">  
+            <div className="row flex-grow-1" id="quiz_box">  
                 <div className = "quiz_box">
                     <br></br>
                     <div className = "quiz_inner_box">
@@ -1024,21 +1035,6 @@ function OpenModuleComponent(props) {
                         {/* {showPersonalization ? <PersonalizationComponent onClickYes={show_hint} onClickNo={_ => setModulePersonalization(false)} message="Do you want to see some lecture material on this topic?" /> : <></>} */}
                         {elements}
                         {questionsForm}
-
-                        {/* <div className="code-challenge-box">
-                                <h3>Coding Challenge</h3>
-                                <p>Would you like to start a coding challenge? Completing a coding challenge is optional, but can earn you achievements and/or points.</p>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-success" onClick={() => openCodingChallenge(2)}>Easier (Fill-in-the-Blanks)</button>
-                                    <button type="button" class="btn btn-warning" onClick={() => openCodingChallenge(1)}>Harder (Code Everything)</button>
-                                </div>
-                            </div> */}
-
-                        {/* <nav>
-                            <ul className="pagination justify-content-center">
-                                {pagination}
-                            </ul>
-                        </nav> */}
                     </div>
                 </div>
             </div>
