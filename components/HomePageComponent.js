@@ -48,7 +48,7 @@ export default function HomePageComponent() {
             return (<></>)
         } else if (editorState === 1) {
             return (
-                <div className="col-5 position-fixed b-r" style={{right: 0}}>
+                <div className="" style={{right: 0}}>
                     <EditorComponent />
                 </div>
             )
