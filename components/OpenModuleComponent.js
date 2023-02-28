@@ -1,5 +1,6 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore } from '../data/Students'
+import { getQuizQuestionById } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
 import PersonalizationComponent from './PersonalizationComponent'
 import { useFormik } from 'formik'
@@ -117,10 +118,11 @@ function OpenModuleComponent(props) {
             const pick = values.picked
             const checked = solvedQuestionCheck(user, moduleName, currentPage)
             solvedQuestionUpdate(user, moduleName, currentPage)
+            getQuizQuestionById("JCtD3zFyLKJsq8yOA52l")
+
             show_related()
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
-                // console.log("hahahahahah")
                 checked.then(value => {
                     console.log("Value", value)
                     if(!value) {
