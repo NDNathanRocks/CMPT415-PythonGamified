@@ -1,5 +1,17 @@
 @import url('../node_modules/font-awesome/css/font-awesome.min.css');
 
+.sideflex {
+  display: flex;
+  margin-left: 2%;
+  flex-direction: row;
+  overflow:hidden
+}
+
+.mysidenav {
+  background-color: grey !important;
+  margin-top: 3% !important;
+}
+
 .form-signin {
   width: 100%;
   max-width: 330px;
