@@ -215,6 +215,44 @@ function OpenModuleComponent(props) {
         }
     }
 
+    const createForm2 = () => {
+        if (questions.length > 0 && currentQuestion < questions.length) {
+            var formQuestion = document.getElementById("quiz_question")
+            var formCode = document.getElementById("quiz_code")
+            
+            const quizQuestion = questions[currentQuestion].question
+            const quizCode = questions[currentQuestion].code
+            console.log("helllooo?")
+            formQuestion.innerHTML = `${quizQuestion}`
+            formCode.innerHTML = `${quizCode}`
+            
+        }
+    }
+
+    const getQuestions = () => {
+        getAllConditionalStatements().then(allQuestions => {
+            let tempQuestions = []
+            for (let i = 0; i < allQuestions.length; i++) {
+                const mcq = allQuestions[i]
+                const question = {
+                    id: mcq.qid,
+                    question: mcq.question,
+                    code: mcq.code,
+                    answers: mcq.answerOptions,
+                    correctAnswerIndex: mcq.canswerIndex,
+                    explanation: mcq.explanation,
+                }
+                tempQuestions.push(question)
+            }
+    
+            setQuestions(tempQuestions)
+            createForm2()
+            
+        })
+    }
+
+    getQuestions()
+
 
     /**
      * Returns the current page's module contents.
@@ -452,7 +490,7 @@ function OpenModuleComponent(props) {
                 explanation: mcq.explanation,
             }
 
-            tempQuestions.push(question)
+            // tempQuestions.push(question)
         }
 
         let divs2 = null
@@ -465,7 +503,7 @@ function OpenModuleComponent(props) {
                 </div> */}
             </div>
         )
-        setQuestions(tempQuestions)
+        // setQuestions(tempQuestions)
         setElements(divs2)
 
         const randomChallenge = incompleteChallenges[Math.floor(Math.random() * incompleteChallenges.length)]
@@ -475,6 +513,7 @@ function OpenModuleComponent(props) {
             code: randomChallenge.code,
             question: randomChallenge.value
         })
+
     }
 
     /**
@@ -595,24 +634,6 @@ function OpenModuleComponent(props) {
     }
 
 
-    getAllConditionalStatements().then(allQuestions => {
-        for (let i = 0; i < allQuestions.length; i++) {
-            const mcq = allQuestions[i]
-            const question = {
-                id: mcq.qid,
-                question: mcq.question,
-                answers: mcq.answerOptions,
-                correctAnswerIndex: mcq.canswerIndex,
-                explanation: mcq.explanation,
-            }
-            // tempQuestions.push(question)
-        }
-
-        // setQuestions(tempQuestions)
-        
-    })
-    createForm()
-
     const { openedModule, setEditor, editorState } = useContext(Context)
     const handleEditorStart = (e) => {
         const module = e.currentTarget.getAttribute('module')
@@ -680,9 +701,44 @@ function OpenModuleComponent(props) {
                     <div className = "quiz_inner_box">
                         <h1>{getPageTitle(currentPage)}</h1>
                         <h5>Question {currentPage + 1}/{moduleJson.body.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
-                        {/* {showPersonalization ? <PersonalizationComponent onClickYes={show_hint} onClickNo={_ => setModulePersonalization(false)} message="Do you want to see some lecture material on this topic?" /> : <></>} */}
                         {elements}
-                        {questionsForm}
+                        <div id ="quiz_form">
+                        <div id="mc-question-box">
+                        <h3>Multiple-Choice Question</h3>
+                        <div class = "code-toolbox">
+                        <form onSubmit={formik.handleSubmit}>
+                            <p id="quiz_question">Question</p>
+                            <SyntaxHighlighter id="quiz_code" language="javascript">
+                                    Code
+                            </SyntaxHighlighter>
+                            <br />
+                            <div className="row d-flex align-items-end">
+                                <div className="col">
+                                    <div role="group">
+                                    <div key={0} className="radio-group">
+                                        <input id = "radio-check" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="0" onChange={formik.handleChange} />
+                                        <span className="form-check-label">Test</span>
+                                    </div>
+                                    </div>
+                                    <br/>
+                                    <button className="btn btn-success btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
+                                </div>
+                                <div className="col">
+                                    <div onload = {show_point()}>
+                                        <div id = "p" className = "point"></div>
+                                        <div className = "pointdescription">10 Coins are need to use a hint.</div>
+                                    </div>
+                                    <button className="btn btn-warning mt-3" type="button">Hint</button>
+                                </div>
+                                <div className="col">
+                                    <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
+                                    <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
+                                </div>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
+                        </div>
                     </div>
                 </div>
             </div>
