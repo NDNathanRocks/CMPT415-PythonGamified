@@ -126,7 +126,7 @@ export default function EditorComponent(props) {
     }
 
     return (
-        <div>
+        <div class="codingchall">
             <h2>Coding Challenge</h2>
             <ul>
                 {prompt}
