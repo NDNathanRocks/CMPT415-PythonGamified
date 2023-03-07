@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore } from '../data/Students'
-import { getQuizQuestionById } from '../data/QuizQuestions'
+import { getQuizQuestionById, getAllConditionalStatements } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
 import PersonalizationComponent from './PersonalizationComponent'
 import { useFormik } from 'formik'
@@ -38,6 +38,8 @@ function OpenModuleComponent(props) {
     const moduleJson = props.file.json
 
     const moduleName = props.file.id
+
+    let questionsForm = null
 
     // Context: user, editor state, challenge data, personalization, toast
     const { user, page, setPage, setEditorState, setChallengeData, personalization, setPersonalization, setToast } = useContext(Context)
@@ -119,7 +121,6 @@ function OpenModuleComponent(props) {
             const pick = values.picked
             const checked = solvedQuestionCheck(user, moduleName, currentPage)
             solvedQuestionUpdate(user, moduleName, currentPage)
-            getQuizQuestionById("JCtD3zFyLKJsq8yOA52l")
 
             show_related()
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
@@ -154,6 +155,65 @@ function OpenModuleComponent(props) {
             }
         },
     })
+
+    const createForm = () => {
+        if (questions.length > 0 && currentQuestion < questions.length) {
+            questionsForm = (
+                <div id="mc-question-box">
+                    <h3>Multiple-Choice Question</h3>
+                    <div class = "code-toolbox">
+                    <form onSubmit={formik.handleSubmit}>
+                        {
+                            questions[currentQuestion].question.map((q, index) => {
+                                if (q.type === "code") {
+                                    return (
+                                        <SyntaxHighlighter language="javascript">
+                                            {q.value}
+                                        </SyntaxHighlighter>
+                                    )
+                                } else {
+                                    return (
+                                        <p>{q.value}</p>
+                                    )
+                                }
+                            })
+                        }
+                        <br />
+                        <div className="row d-flex align-items-end">
+                            <div className="col">
+                                <div role="group">
+                                {
+                                    questions[currentQuestion].answers.map((q, index) => {
+                                        return (
+                                            <div key={index} className="radio-group">
+                                                <input id = "radio-check" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value={index} onChange={formik.handleChange} />
+                                                <span className="form-check-label">{q}</span>
+                                            </div>
+                                        )
+                                    })
+                                }
+                                </div>
+                                <br/>
+                                <button className="btn btn-success btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
+                            </div>
+                            <div className="col">
+                                <div onload = {show_point()}>
+                                    <div id = "p" className = "point"></div>
+                                    <div className = "pointdescription">10 Coins are need to use a hint.</div>
+                                </div>
+                                <button className="btn btn-warning mt-3" type="button">Hint</button>
+                            </div>
+                            <div className="col">
+                                <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
+                                <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            )
+        }
+    }
 
 
     /**
@@ -240,8 +300,6 @@ function OpenModuleComponent(props) {
             if (page == 1) {
                 document.getElementById("quiz_list").style.visibility = "visible";
             }
-            // menu1.classList.toggle("active")
-            // menu2.classList.toggle("acitve")
         }
 
         
@@ -321,32 +379,6 @@ function OpenModuleComponent(props) {
             )
         }
         pageList.push(<a class = "bottom_page" id = "page_number" disabled=""> Page {currentPage + 1}/{moduleJson.body.length} </a>)
-        // for (let i = 0; i < moduleJson.body.length; i++) {
-            
-            // if (i === currentPage) {
-            //     pageList.push(
-            //         <li key={i}>
-            //             <a className="button-8" href="#" onClick={() => handlePageChange(i)}>
-            //                 Current Page
-            //             </a>
-            //         </li>
-            //     )
-
-            //     continue
-            // }
-
-            // if (i === moduleJson.body.length - 1) {
-            //     pageList.push(
-            //         <li className="page-item" key={i}>
-            //             <a className="page-link" href="#" onClick={() => handlePageChange(i)}>
-            //                 {getPageTitle(i)}
-            //             </a>
-            //         </li>
-            //     )
-
-            //     continue
-            // }
-        // }
 
         if (currentPage !== moduleJson.body.length - 1) {
             pageList.push(
@@ -370,6 +402,17 @@ function OpenModuleComponent(props) {
         let divs = []
         let incompleteChallenges = []
 
+        // const question = getQuizQuestionById("JCtD3zFyLKJsq8yOA52l")
+        // console.log("Module start")
+        // console.log(question)
+        // console.log(question[0])
+
+        getQuizQuestionById("JCtD3zFyLKJsq8yOA52l").then(question => {
+            // console.log("Testttt")
+            // console.log(question)
+            
+        })
+
         if (personalization === null) {
             getPersonalization(user.uuid).then(p => {
                 setPersonalization(p)
@@ -391,11 +434,13 @@ function OpenModuleComponent(props) {
                     incompleteChallenges.push(getChallenge)
                 }
             }
-            divs.push(transformJsonToHtml(moduleBody, i, showLecture))
         }
 
         const mcqs = getCurrentPageMcqs()
         const tempQuestions = []
+
+        // console.log("Test all")
+        // console.log(getAllConditionalStatements())
 
         for (let i = 0; i < mcqs.length; i++) {
             const mcq = mcqs[i]
@@ -409,7 +454,7 @@ function OpenModuleComponent(props) {
 
             tempQuestions.push(question)
         }
-        // console.log(typeof divs)
+
         let divs2 = null
         divs2 = (
             <div id="mc-question-box2">
@@ -534,56 +579,6 @@ function OpenModuleComponent(props) {
     }
 
     /**
-     * Transforms the module json to html.
-     * @param {Object} moduleBody 
-     * @param {Number} index 
-     * @param {Boolean} addContent 
-     * @returns HTML representation of JSON elements in module.
-     */
-    const transformJsonToHtml = (moduleBody, index, addContent) => {
-        let divs = []
-        
-        const element = moduleBody[index]
-        // If the element is a header element, add it to the html
-        if (element['type'] === 'header' && addContent) {
-            divs.push(
-                <h3>{element['value']}</h3>
-            )
-        }
-        // console.log(element)
-        // if (element['type'] == '')
-
-        // If the element is a html element, add it to the html
-        if (element['type'] === 'html' && addContent) {
-            divs.push((
-                <span>{element['value']}<br/></span>
-            ))
-        }
-
-        // If the element is a code element, add it to the html
-        if (element['type'] === 'code' && addContent) {
-            const value = element['value']
-            divs.push(
-                <div id="code-editor-box">
-                    <SyntaxHighlighter language="javascript">
-                        {value}
-                    </SyntaxHighlighter>
-                </div>
-            )
-        }
-
-        // If the element is a image element, add it to the html
-        if (element['type'] === 'image' && addContent) {
-            divs.push(
-                <div className="module-image">
-                    <img src={element['value']} />
-                </div>
-            )
-        }
-        return divs
-    }
-
-    /**
      * Goes to the next multiple choice question.
      */
     const nextQuestion = () => {
@@ -599,66 +594,24 @@ function OpenModuleComponent(props) {
         return (<Skeleton count={5}></Skeleton>)
     }
 
-    let questionsForm = null
 
-    if (questions.length > 0 && currentQuestion < questions.length) {
-        questionsForm = (
-            <div id="mc-question-box">
-                <h3>Multiple-Choice Question</h3>
-                <div class = "code-toolbox">
-                <form onSubmit={formik.handleSubmit}>
-                    {
-                        questions[currentQuestion].question.map((q, index) => {
-                            if (q.type === "code") {
-                                return (
-                                    <SyntaxHighlighter language="javascript">
-                                        {q.value}
-                                    </SyntaxHighlighter>
-                                )
-                            } else {
-                                return (
-                                    <p>{q.value}</p>
-                                )
-                            }
-                        })
-                    }
-                    <br />
-                    <div className="row d-flex align-items-end">
-                        <div className="col">
-                            <div role="group">
-                            {
-                                questions[currentQuestion].answers.map((q, index) => {
-                                    return (
-                                        <div key={index} className="radio-group">
-                                            <input id = "radio-check" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value={index} onChange={formik.handleChange} />
-                                            <span className="form-check-label">{q}</span>
-                                        </div>
-                                    )
-                                })
-                            }
-                            </div>
-                            <br/>
-                            <button className="btn btn-success btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
-                        </div>
-                        <div className="col">
-                            <div onload = {show_point()}>
-                                <div id = "p" className = "point"></div>
-                                <div className = "pointdescription">10 Coins are need to use a hint.</div>
-                            </div>
-                            <button className="btn btn-warning mt-3" type="button">Hint</button>
-                        </div>
-                        <div className="col">
-                            <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
-                            <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
-                        </div>
-                    </div>
-                </form>
-                </div>
-            </div>
-        )
-    }
+    getAllConditionalStatements().then(allQuestions => {
+        for (let i = 0; i < allQuestions.length; i++) {
+            const mcq = allQuestions[i]
+            const question = {
+                id: mcq.qid,
+                question: mcq.question,
+                answers: mcq.answerOptions,
+                correctAnswerIndex: mcq.canswerIndex,
+                explanation: mcq.explanation,
+            }
+            // tempQuestions.push(question)
+        }
 
-
+        // setQuestions(tempQuestions)
+        
+    })
+    createForm()
 
     const { openedModule, setEditor, editorState } = useContext(Context)
     const handleEditorStart = (e) => {
@@ -676,96 +629,6 @@ function OpenModuleComponent(props) {
             id: module,
             json: content
         })
-    }
-    
-        /**
-     * Sends an email to the user with a link to reset their password
-     * @param {Event} e 
-     */
-        const show_hint = (e) => {
-            setModulePersonalization(true)
-            document.getElementById("mc-question-box3").style.display = "none";
-            document.getElementById("mc-question-box2").style.display = "block";
-            document.getElementById("hide_hint").style.visibility = "hidden"
-        }
-    
-        /**
-     * Sends an email to the user with a link to reset their password
-     * @param {Event} e 
-     */
-         const show_hint2 = (e) => {
-            // console.log({currentScore})
-            currentScore.then(value => {
-                // console.log(value);
-                // console.log(typeof value)
-                var point = parseInt(value)
-                const checked = solvedQuestionCheck(user, moduleName, currentPage)
-                console.log(checked)
-                checked.then(value => {
-                    console.log("CHECKED: ", value)
-                    if(value) {
-                        console.log("free?", value)
-                        setToast({
-                            title: "Good job for trying again",
-                            message: "⭐ Hint is freely offered"
-                        })
-                        setModulePersonalization(true)
-                        // e.preventDefault()
-                        console.log("here")
-                        document.getElementById("mc-question-box3").style.display = "none";
-                        document.getElementById("mc-question-box2").style.display = "block";
-                    }
-                    else {
-                        if(point >= 10) {
-                            takeStudentScore(user, 10)
-                            setToast({
-                                title: "Open the hint with the point!",
-                                message: "⭐ -10 score"
-                            })
-                            setModulePersonalization(true)
-                        // e.preventDefault()
-                        console.log("here")
-                        document.getElementById("mc-question-box3").style.display = "none";
-                        document.getElementById("mc-question-box2").style.display = "block";
-                        }
-                        else {
-                            setToast({
-                            title: "You don't have enought point!",
-                            message: "⭐ Need at least 10 points"
-                            })
-                        }
-                    }
-                })
-              });
-            
-        }
-
-      /**
-     * Sends an email to the user with a link to reset their password
-     * @param {Event} e 
-     */
-       const hide_hint = (e) => {
-        setShowLecture(false)
-        setModulePersonalization(false)
-        // e.preventDefault()
-        console.log("here")
-        document.getElementById("mc-question-box").style.visibility = "visible"
-        if (document.getElementById("prev01")!=null) {
-            document.getElementById("prev01").style.visibility = "visible"
-        }
-        if (document.getElementById("prev02")!=null) {
-            document.getElementById("prev02").style.visibility = "visible"
-        }
-        if (document.getElementById("next01")!=null) {
-            document.getElementById("next01").style.visibility = "visible"
-        }
-        if (document.getElementById("next02")!=null) {
-            document.getElementById("next02").style.visibility = "visible"
-        }
-        if (document.getElementById("page_number")!=null) {
-            document.getElementById("page_number").style.visibility = "visible"
-        }
-        // {pagination}
     }
 
           /**
@@ -787,224 +650,7 @@ function OpenModuleComponent(props) {
             document.getElementById('p').innerHTML =  'Current Coins: ' + value + ' </p>';
         });
     }
-    /**
-     * @param {Number} page 
-     * @returns {String} title of page
-     */
-    const checking_solved = (page) => {
-        const checked = solvedQuestionCheck(user, moduleName, 0)
-        const checked1 = solvedQuestionCheck(user, moduleName, 1)
-        const checked2 = solvedQuestionCheck(user, moduleName, 2)
-        const checked3 = solvedQuestionCheck(user, moduleName, 3)
-        const checked4 = solvedQuestionCheck(user, moduleName, 4)
-        const checked5 = solvedQuestionCheck(user, moduleName, 5)
-        const checked6 = solvedQuestionCheck(user, moduleName, 6)
-        const checked7 = solvedQuestionCheck(user, moduleName, 7)
-        const checked8 = solvedQuestionCheck(user, moduleName, 8)
-        const checked9 = solvedQuestionCheck(user, moduleName, 9)
-        const checked10 = solvedQuestionCheck(user, moduleName, 10)
-        const checked11 = solvedQuestionCheck(user, moduleName, 11)
-        const checked12 = solvedQuestionCheck(user, moduleName, 12)
-        const checked13 = solvedQuestionCheck(user, moduleName, 13)
-        const checked14 = solvedQuestionCheck(user, moduleName, 14)
-        const checked15 = solvedQuestionCheck(user, moduleName, 15)
-        const checked16 = solvedQuestionCheck(user, moduleName, 16)
-        const checked17 = solvedQuestionCheck(user, moduleName, 17)
-        const checked18 = solvedQuestionCheck(user, moduleName, 18)
-        const checked19 = solvedQuestionCheck(user, moduleName, 19)
-        checked.then((value) => {
-            if(value){
-                document.getElementById('question1_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question1_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked1.then((value) => {
-            if(value){
-                document.getElementById('question2_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question2_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked2.then((value) => {
-            console.log("checkedededed")
-            if(value){
-                document.getElementById('question3_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question3_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked3.then((value) => {
-            if(value){
-                document.getElementById('question4_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question4_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked4.then((value) => {
-            if(value){
-                document.getElementById('question5_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question5_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked5.then((value) => {
-            if(value){
-                document.getElementById('question6_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question6_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked6.then((value) => {
-            if(value){
-                document.getElementById('question7_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question7_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked7.then((value) => {
-            if(value){
-                document.getElementById('question8_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question8_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked8.then((value) => {
-            if(value){
-                document.getElementById('question9_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question9_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked9.then((value) => {
-            if(value){
-                document.getElementById('question10_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question10_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked10.then((value) => {
-            if(value){
-                document.getElementById('question11_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question11_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked11.then((value) => {
-            if(value){
-                document.getElementById('question12_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question12_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked12.then((value) => {
-            if(value){
-                document.getElementById('question13_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question13_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked13.then((value) => {
-            if(value){
-                document.getElementById('question14_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question14_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked14.then((value) => {
-            if(value){
-                document.getElementById('question15_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question15_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked15.then((value) => {
-            if(value){
-                document.getElementById('question16_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question16_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked16.then((value) => {
-            if(value){
-                document.getElementById('question17_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question17_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked17.then((value) => {
-            if(value){
-                document.getElementById('question18_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question18_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked18.then((value) => {
-            if(value){
-                document.getElementById('question19_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question19_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked19.then((value) => {
-            if(value){
-                document.getElementById('question20_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question20_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-
-            
-        
-    }
-
-    /**
-     * @param {Number} page 
-     * @returns {String} title of page
-     */
-    const question_solve_check1 = (page) => {
-        const checked = solvedQuestionCheck(user, moduleName, currentPage)
-        var text = printChecking()
-        console.log("TEXT is HERE")
-        console.log(text)
-        checked.then(value => {
-            // console.log(value)
-            if(!value) {
-                // <span id = "quiz1" class = "quiz_list"> ❌ </span>
-                // return '❌'
-                // console.log("quiz1hehiehiehieh")
-                text = '❌'
-            }
-            else {
-                // <span id = "quiz1" class = "quiz_list"> ✅ </span>
-                // return '✅'
-                text = '✅'
-                // return 'checked'
-                // console.log("hhidfjlaidjfliadj;flijdal;ifjladjf;liasd;j;fl")
-            }
-        })
-        return text
-    }
+   
 
     return (
         <div class="d-flex flex-row">

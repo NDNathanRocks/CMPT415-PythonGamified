@@ -37,8 +37,6 @@ const quizQuestionConverter = {
     },
     fromFirestore: function (snapshot, options) {
         const data = snapshot.data(options)
-        console.log(data.topic)
-        console.log(data.question)
         return new QuizQuestion(data.topic, data.qid, data.question, data.code, data.answer_options, data.answer_index, data.explanation)
     }
 }
@@ -46,7 +44,7 @@ const quizQuestionConverter = {
 /**
  * Returns a QuizQuestion by qid
  * @param {string} qid 
- * @returns Student
+ * @returns {QuizQuestion}
  */
 export async function getQuizQuestionById(qid) {
     const q = query(collection(db, "quiz-questions/conditional-statements/multiple-choice"), where("qid", "==", qid))
@@ -58,4 +56,25 @@ export async function getQuizQuestionById(qid) {
     }
 
     return quizQuestionConverter.fromFirestore(querySnapshot.docs[0], { idField: "qid" })
+}
+
+/**
+ * 
+ */
+export async function getAllConditionalStatements() {
+    const q = query(collection(db, "quiz-questions/conditional-statements/multiple-choice"))
+
+    const querySnapshot = await getDocs(q)
+    
+    if (querySnapshot.empty) {
+        return null
+    }
+
+    const questionList = []
+
+    for (const doc of querySnapshot.docs) {
+        questionList.push(quizQuestionConverter.fromFirestore(doc, { idField: "qid" }))
+    }
+
+    return questionList
 }
