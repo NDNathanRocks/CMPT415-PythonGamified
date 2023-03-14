@@ -111,6 +111,9 @@ function OpenModuleComponent(props) {
             const checked = solvedQuestionCheck(user, moduleName, currentPage)
             solvedQuestionUpdate(user, moduleName, currentPage)
 
+            console.log(`pick: ${pick}`)
+            console.log(`answer: ${String(questions[currentQuestion])}`)
+
             show_related()
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
@@ -147,13 +150,24 @@ function OpenModuleComponent(props) {
 
     const createForm = () => {
         if (questions.length > 0 && currentQuestion < questions.length) {
-            var formQuestion = document.getElementById("quiz_question")
-            var formCode = document.getElementById("quiz_code")
+            var formQuestion = document.getElementById("quiz_question");
+            var formCode = document.getElementById("quiz_code");
             
-            const quizQuestion = questions[currentQuestion].question
-            const quizCode = questions[currentQuestion].code
-            formQuestion.innerHTML = `${quizQuestion}`
-            formCode.innerHTML = `${quizCode}`
+            const quizQuestion = questions[currentQuestion].question;
+            const quizCode = questions[currentQuestion].code;
+            const quizAnswerOptions = questions[currentQuestion].answers;
+            formQuestion.innerHTML = `${quizQuestion}`;
+            formCode.innerHTML = `${quizCode}`;
+
+            for (let i = 0; i < 6; i++) {
+                if (i < quizAnswerOptions.length) {
+                    var currentLabel = document.getElementById(`label-${i}`);
+                    currentLabel.innerHTML = ` ${quizAnswerOptions[i]}`
+                } else {
+                    var currentRadio = document.getElementById(`radio-check-${i}`);
+                    currentRadio.style.display = "none";
+                }
+            }
             
         }
     }
@@ -168,7 +182,7 @@ function OpenModuleComponent(props) {
                     question: mcq.question,
                     code: mcq.code,
                     answers: mcq.answerOptions,
-                    correctAnswerIndex: mcq.canswerIndex,
+                    correctAnswerIndex: mcq.answerIndex,
                     explanation: mcq.explanation,
                 }
                 tempQuestions.push(question)
@@ -180,7 +194,7 @@ function OpenModuleComponent(props) {
         })
     }
 
-    getQuestions()
+    // getQuestions()
 
     /**
      * Returns the current page's module contents.
@@ -229,8 +243,6 @@ function OpenModuleComponent(props) {
      * @param {Number} page 
      */
          const menu_select = (page) => {
-            // console.log("Here")
-            console.log(page)
             var menu1 = document.getElementById("menu1")
             var menu2 = document.getElementById("menu2")
             var menu3 = document.getElementById("menu3")
@@ -304,7 +316,11 @@ function OpenModuleComponent(props) {
      */
     const refreshFormik = () => {
         formik.resetForm({})
-        document.getElementById("radio-check").checked = false;
+        for (let i = 0; i < 6; i++) {
+            var currentRadio = document.getElementById(`radio-check-${i}`);
+            currentRadio.checked = false;
+        }
+        document.getElementsByClassName("form-check-input").checked = false;
         formik.setFieldValue('picked', '')
         // if (matchId) { // If record exists
         //     await resetForm({ values }); // sets dirty false
@@ -353,17 +369,6 @@ function OpenModuleComponent(props) {
         const moduleBody = getCurrentPageBody()
         let divs = []
         let incompleteChallenges = []
-
-        // const question = getQuizQuestionById("JCtD3zFyLKJsq8yOA52l")
-        // console.log("Module start")
-        // console.log(question)
-        // console.log(question[0])
-
-        getQuizQuestionById("JCtD3zFyLKJsq8yOA52l").then(question => {
-            // console.log("Testttt")
-            // console.log(question)
-            
-        })
 
         if (personalization === null) {
             getPersonalization(user.uuid).then(p => {
@@ -448,7 +453,6 @@ function OpenModuleComponent(props) {
     }
 
     const openQuiz = () => {
-        console.log("here in openQuiz")
         setEditorState(0)
 
         document.getElementById("quiz_box").style.display = "block";
@@ -509,7 +513,7 @@ function OpenModuleComponent(props) {
         console.log("Getting q: " + q.id)
 
         getStudentAnswers(user, q.id).then(answers => {
-            console.log(answers)
+            // console.log(answers)
             // ToDo: Load saved answers into Formik
             //formik.picked = answers.answers[0] | ''
             //formik.isSubmitting = true
@@ -544,7 +548,7 @@ function OpenModuleComponent(props) {
     
 
     const show_related = () => {
-        console.log("here")
+        
     }
 
     function show_point() {
@@ -596,9 +600,25 @@ function OpenModuleComponent(props) {
                             <div className="row d-flex align-items-end">
                                 <div className="col">
                                     <div role="group">
-                                    <div key={0} className="radio-group">
-                                        <input id = "radio-check" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="0" onChange={formik.handleChange} />
-                                        <span className="form-check-label">Test</span>
+                                    <div key={0} id="answer_options" className="radio-group">
+                                        <input id = "radio-check-0" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="0" onChange={formik.handleChange} />
+                                        <label id="label-0" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-1" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="1" onChange={formik.handleChange} />
+                                        <label id="label-1" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-2" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="2" onChange={formik.handleChange} />
+                                        <label id="label-2" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-3" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="3" onChange={formik.handleChange} />
+                                        <label id="label-3" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-4" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="4" onChange={formik.handleChange} />
+                                        <label id="label-4" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-5" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="5" onChange={formik.handleChange} />
+                                        <label id="label-5" className="ms-2"></label>
+                                        <br/>
                                     </div>
                                     </div>
                                     <br/>
