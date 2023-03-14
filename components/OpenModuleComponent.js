@@ -609,6 +609,7 @@ function OpenModuleComponent(props) {
                     </div>
                 <div id = "quiz_list" class = "quiz_list3">
                 </div> 
+                </div>
             </div>
             <div className="row flex-grow-1" id="quiz_box">  
                 <div className = "quiz_box">
