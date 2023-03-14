@@ -1,4 +1,5 @@
 import { useEffect, useState, useContext, memo } from 'react'
+import { Modal } from "react-bootstrap";
 import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore } from '../data/Students'
 import { getQuizQuestionById, getAllConditionalStatements } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
@@ -16,6 +17,26 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 
+
+function HintModal(props) {
+    return (
+      <Modal
+        {...props}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Question Hint
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Hint about question here.</p>
+        </Modal.Body>
+      </Modal>
+    );
+  }
 
 /**
  * Component for a module's contents and multiple choice questions.
@@ -70,6 +91,8 @@ function OpenModuleComponent(props) {
 
     // State for the current explanation for the multiple choice question
     const [code, setCode] = useState('')
+
+    const [modalShow, setModalShow] = useState(false);
 
     // Load personalization
     useEffect(() => {
@@ -196,7 +219,7 @@ function OpenModuleComponent(props) {
         })
     }
 
-    getQuestions()
+    // getQuestions()
 
     /**
      * Returns the current page's module contents.
@@ -631,7 +654,7 @@ function OpenModuleComponent(props) {
                                         <div id = "p" className = "point"></div>
                                         <div className = "pointdescription">10 Coins are need to use a hint.</div>
                                     </div>
-                                    <button className="btn btn-warning mt-3" type="button">Hint</button>
+                                    <button className="btn btn-warning mt-3" type="button" onClick={() => setModalShow(true)}>Hint</button>
                                 </div>
                                 <div className="col">
                                     <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
@@ -645,6 +668,10 @@ function OpenModuleComponent(props) {
                     </div>
                 </div>
             </div>
+            <HintModal
+                show={modalShow}
+                onHide={() => setModalShow(false)}
+            />
         </div>
     )
 }
