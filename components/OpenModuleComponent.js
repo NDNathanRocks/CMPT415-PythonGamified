@@ -599,8 +599,8 @@ function OpenModuleComponent(props) {
     }
 
     return (
-        <div>
-            <div class="d-flex flex-row">
+        <div class="d-flex flex-row">
+            <div>
                 <div class="bg-primary text-dark bg-opacity-25 rounded ps-2 pt-4 me-5 mb-4">
                     <div>
                         <div class="d-flex flex-row justify-content-between rounded sidebar_row px-4 py-2"  id="menu2">
