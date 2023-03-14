@@ -68,6 +68,9 @@ function OpenModuleComponent(props) {
     // State for personalization (lecture visibility, etc.)
     const [showPersonalization, setShowPersonalization] = useState(null)
 
+    // State for the current explanation for the multiple choice question
+    const [code, setCode] = useState('')
+
     // Load personalization
     useEffect(() => {
         getPersonalization(user.uuid).then(p => {
@@ -110,9 +113,6 @@ function OpenModuleComponent(props) {
             const pick = values.picked
             const checked = solvedQuestionCheck(user, moduleName, currentPage)
             solvedQuestionUpdate(user, moduleName, currentPage)
-
-            console.log(`pick: ${pick}`)
-            console.log(`answer: ${String(questions[currentQuestion])}`)
 
             show_related()
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
@@ -157,7 +157,9 @@ function OpenModuleComponent(props) {
             const quizCode = questions[currentQuestion].code;
             const quizAnswerOptions = questions[currentQuestion].answers;
             formQuestion.innerHTML = `${quizQuestion}`;
-            formCode.innerHTML = `${quizCode}`;
+
+            setCode(quizCode)
+            // setCode("x = 10 \ny = 10 \nif x < y: \n    print(\"x is less than y\")")
 
             for (let i = 0; i < 6; i++) {
                 if (i < quizAnswerOptions.length) {
@@ -194,7 +196,7 @@ function OpenModuleComponent(props) {
         })
     }
 
-    // getQuestions()
+    getQuestions()
 
     /**
      * Returns the current page's module contents.
@@ -593,8 +595,8 @@ function OpenModuleComponent(props) {
                         <div class = "code-toolbox">
                         <form onSubmit={formik.handleSubmit}>
                             <p id="quiz_question">Question</p>
-                            <SyntaxHighlighter id="quiz_code" language="javascript">
-                                    Code
+                            <SyntaxHighlighter id="quiz_code" language="python">
+                                {code}
                             </SyntaxHighlighter>
                             <br />
                             <div className="row d-flex align-items-end">
