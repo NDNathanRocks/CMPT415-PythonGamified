@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext, memo } from 'react'
+import { Modal } from "react-bootstrap";
 import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore } from '../data/Students'
-import { getQuizQuestionById } from '../data/QuizQuestions'
+import { getQuizQuestionById, getAllConditionalStatements } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
 import PersonalizationComponent from './PersonalizationComponent'
 import { useFormik } from 'formik'
@@ -8,18 +9,7 @@ import Context from '../context/Context'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import RecentActivityComponent from './RecentActivityComponent'
 import conditionalStatementsJson from '../modules/conditional_statements.json'
-import EditorComponent from './EditorComponent'
-import EasyEditorComponent from './EasyEditorComponent'
-import LeaderboardComponent from './LeaderboardComponent'
-import { Student, getStudent, createStudent } from '../data/Students'
-import validator from 'validator'
-import { v4 as uuidv4 } from "uuid"
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, sendSignInLinkToEmail, UserCredential } from "firebase/auth"
-import { auth } from '../firebase'
-import { v4 } from 'uuid'
-import { Quiz } from '../data/Quiz'
 import { Pages } from '../context/Pages'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
@@ -28,6 +18,26 @@ import { far } from '@fortawesome/free-regular-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import SideBar from './SideBarComponent'
 // import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
+
+function HintModal(props) {
+    return (
+      <Modal
+        {...props}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            Question Hint
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Hint about question here.</p>
+        </Modal.Body>
+      </Modal>
+    );
+  }
 
 /**
  * Component for a module's contents and multiple choice questions.
@@ -39,6 +49,8 @@ function OpenModuleComponent(props) {
     const moduleJson = props.file.json
 
     const moduleName = props.file.id
+
+    let questionsForm = null
 
     // Context: user, editor state, challenge data, personalization, toast
     const { user, page, setPage, setEditorState, setChallengeData, personalization, setPersonalization, setToast } = useContext(Context)
@@ -78,6 +90,11 @@ function OpenModuleComponent(props) {
     // State for personalization (lecture visibility, etc.)
     const [showPersonalization, setShowPersonalization] = useState(null)
 
+    // State for the current explanation for the multiple choice question
+    const [code, setCode] = useState('')
+
+    const [modalShow, setModalShow] = useState(false);
+    
     // State for SideBar
     const [sideStr, setSideStr] = useState("quiz")
 
@@ -123,7 +140,6 @@ function OpenModuleComponent(props) {
             const pick = values.picked
             const checked = solvedQuestionCheck(user, moduleName, currentPage)
             solvedQuestionUpdate(user, moduleName, currentPage)
-            getQuizQuestionById("JCtD3zFyLKJsq8yOA52l")
 
             show_related()
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
@@ -159,20 +175,55 @@ function OpenModuleComponent(props) {
         },
     })
 
+    const createForm = () => {
+        if (questions.length > 0 && currentQuestion < questions.length) {
+            var formQuestion = document.getElementById("quiz_question");
+            var formCode = document.getElementById("quiz_code");
+            
+            const quizQuestion = questions[currentQuestion].question;
+            const quizCode = questions[currentQuestion].code;
+            const quizAnswerOptions = questions[currentQuestion].answers;
+            formQuestion.innerHTML = `${quizQuestion}`;
 
-    /**
-     * Returns the current page's module contents.
-     * @returns HTML for the module's contents.
-     */
-    const getCurrentMenuBody = () => {
-        const currentMenuBody = moduleJson.body.find(body => body.page === currentMenu)
+            setCode(quizCode)
+            // setCode("x = 10 \ny = 10 \nif x < y: \n    print(\"x is less than y\")")
 
-        if (currentMenuBody) {
-            return currentMenuBody.content
+            for (let i = 0; i < 6; i++) {
+                if (i < quizAnswerOptions.length) {
+                    var currentLabel = document.getElementById(`label-${i}`);
+                    currentLabel.innerHTML = ` ${quizAnswerOptions[i]}`
+                } else {
+                    var currentRadio = document.getElementById(`radio-check-${i}`);
+                    currentRadio.style.display = "none";
+                }
+            }
+            
         }
-
-        return []
     }
+
+    const getQuestions = () => {
+        getAllConditionalStatements().then(allQuestions => {
+            let tempQuestions = []
+            for (let i = 0; i < allQuestions.length; i++) {
+                const mcq = allQuestions[i]
+                const question = {
+                    id: mcq.qid,
+                    question: mcq.question,
+                    code: mcq.code,
+                    answers: mcq.answerOptions,
+                    correctAnswerIndex: mcq.answerIndex,
+                    explanation: mcq.explanation,
+                }
+                tempQuestions.push(question)
+            }
+    
+            setQuestions(tempQuestions)
+            createForm()
+            
+        })
+    }
+
+    // getQuestions()
 
     /**
      * Returns the current page's module contents.
@@ -221,8 +272,6 @@ function OpenModuleComponent(props) {
      * @param {Number} page 
      */
          const menu_select = (page) => {
-            // console.log("Here")
-            console.log(page)
             var menu1 = document.getElementById("menu1")
             var menu2 = document.getElementById("menu2")
             var menu3 = document.getElementById("menu3")
@@ -244,8 +293,6 @@ function OpenModuleComponent(props) {
             if (page == 1) {
                 document.getElementById("quiz_list").style.visibility = "visible";
             }
-            // menu1.classList.toggle("active")
-            // menu2.classList.toggle("acitve")
         }
 
         
@@ -298,7 +345,11 @@ function OpenModuleComponent(props) {
      */
     const refreshFormik = () => {
         formik.resetForm({})
-        document.getElementById("radio-check").checked = false;
+        for (let i = 0; i < 6; i++) {
+            var currentRadio = document.getElementById(`radio-check-${i}`);
+            currentRadio.checked = false;
+        }
+        document.getElementsByClassName("form-check-input").checked = false;
         formik.setFieldValue('picked', '')
         // if (matchId) { // If record exists
         //     await resetForm({ values }); // sets dirty false
@@ -325,32 +376,6 @@ function OpenModuleComponent(props) {
             )
         }
         pageList.push(<a class = "bottom_page" id = "page_number" disabled=""> Page {currentPage + 1}/{moduleJson.body.length} </a>)
-        // for (let i = 0; i < moduleJson.body.length; i++) {
-            
-            // if (i === currentPage) {
-            //     pageList.push(
-            //         <li key={i}>
-            //             <a className="button-8" href="#" onClick={() => handlePageChange(i)}>
-            //                 Current Page
-            //             </a>
-            //         </li>
-            //     )
-
-            //     continue
-            // }
-
-            // if (i === moduleJson.body.length - 1) {
-            //     pageList.push(
-            //         <li className="page-item" key={i}>
-            //             <a className="page-link" href="#" onClick={() => handlePageChange(i)}>
-            //                 {getPageTitle(i)}
-            //             </a>
-            //         </li>
-            //     )
-
-            //     continue
-            // }
-        // }
 
         if (currentPage !== moduleJson.body.length - 1) {
             pageList.push(
@@ -395,11 +420,13 @@ function OpenModuleComponent(props) {
                     incompleteChallenges.push(getChallenge)
                 }
             }
-            divs.push(transformJsonToHtml(moduleBody, i, showLecture))
         }
 
         const mcqs = getCurrentPageMcqs()
         const tempQuestions = []
+
+        // console.log("Test all")
+        // console.log(getAllConditionalStatements())
 
         for (let i = 0; i < mcqs.length; i++) {
             const mcq = mcqs[i]
@@ -411,9 +438,9 @@ function OpenModuleComponent(props) {
                 explanation: mcq.explanation,
             }
 
-            tempQuestions.push(question)
+            // tempQuestions.push(question)
         }
-        // console.log(typeof divs)
+
         let divs2 = null
         divs2 = (
             <div id="mc-question-box2">
@@ -424,7 +451,7 @@ function OpenModuleComponent(props) {
                 </div> */}
             </div>
         )
-        setQuestions(tempQuestions)
+        // setQuestions(tempQuestions)
         setElements(divs2)
 
         const randomChallenge = incompleteChallenges[Math.floor(Math.random() * incompleteChallenges.length)]
@@ -434,6 +461,7 @@ function OpenModuleComponent(props) {
             code: randomChallenge.code,
             question: randomChallenge.value
         })
+
     }
 
     /**
@@ -454,7 +482,6 @@ function OpenModuleComponent(props) {
     }
 
     const openQuiz = () => {
-        console.log("here in openQuiz")
         setEditorState(0)
 
         document.getElementById("quiz_box").style.display = "block";
@@ -502,21 +529,6 @@ function OpenModuleComponent(props) {
         return null
     }
 
-    /**
-     * Sets the module's personalization
-     * @param {*} value 
-     */
-    const setModulePersonalization = (value) => {
-        if (value) {
-            setShowLecture(value)
-            setShowPersonalization(false)
-            handleModuleStart()
-            setCurrentPage(currentPage)
-            setCurrentMenu(currentPage)
-        } else {
-            setShowPersonalization(false)
-        }
-    }
 
     /**
      * Retrieves student answers (INCOMPLETE)
@@ -530,61 +542,11 @@ function OpenModuleComponent(props) {
         console.log("Getting q: " + q.id)
 
         getStudentAnswers(user, q.id).then(answers => {
-            console.log(answers)
+            // console.log(answers)
             // ToDo: Load saved answers into Formik
             //formik.picked = answers.answers[0] | ''
             //formik.isSubmitting = true
         })
-    }
-
-    /**
-     * Transforms the module json to html.
-     * @param {Object} moduleBody 
-     * @param {Number} index 
-     * @param {Boolean} addContent 
-     * @returns HTML representation of JSON elements in module.
-     */
-    const transformJsonToHtml = (moduleBody, index, addContent) => {
-        let divs = []
-        
-        const element = moduleBody[index]
-        // If the element is a header element, add it to the html
-        if (element['type'] === 'header' && addContent) {
-            divs.push(
-                <h3>{element['value']}</h3>
-            )
-        }
-        // console.log(element)
-        // if (element['type'] == '')
-
-        // If the element is a html element, add it to the html
-        if (element['type'] === 'html' && addContent) {
-            divs.push((
-                <span>{element['value']}<br/></span>
-            ))
-        }
-
-        // If the element is a code element, add it to the html
-        if (element['type'] === 'code' && addContent) {
-            const value = element['value']
-            divs.push(
-                <div id="code-editor-box">
-                    <SyntaxHighlighter language="javascript">
-                        {value}
-                    </SyntaxHighlighter>
-                </div>
-            )
-        }
-
-        // If the element is a image element, add it to the html
-        if (element['type'] === 'image' && addContent) {
-            divs.push(
-                <div className="module-image">
-                    <img src={element['value']} />
-                </div>
-            )
-        }
-        return divs
     }
 
     /**
@@ -603,174 +565,6 @@ function OpenModuleComponent(props) {
         return (<Skeleton count={5}></Skeleton>)
     }
 
-    let questionsForm = null
-
-    if (questions.length > 0 && currentQuestion < questions.length) {
-        questionsForm = (
-            <div id="mc-question-box">
-                <h3>Multiple-Choice Question</h3>
-                <div class = "code-toolbox">
-                <form onSubmit={formik.handleSubmit}>
-                    {
-                        questions[currentQuestion].question.map((q, index) => {
-                            if (q.type === "code") {
-                                return (
-                                    <SyntaxHighlighter language="javascript">
-                                        {q.value}
-                                    </SyntaxHighlighter>
-                                )
-                            } else {
-                                return (
-                                    <p>{q.value}</p>
-                                )
-                            }
-                        })
-                    }
-                    <br />
-                    <div className="row d-flex align-items-end">
-                        <div className="col">
-                            <div role="group">
-                            {
-                                questions[currentQuestion].answers.map((q, index) => {
-                                    return (
-                                        <div key={index} className="radio-group">
-                                            <input id = "radio-check" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value={index} onChange={formik.handleChange} />
-                                            <span className="form-check-label">{q}</span>
-                                        </div>
-                                    )
-                                })
-                            }
-                            </div>
-                            <br/>
-                            <button className="btn btn-success btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
-                        </div>
-                        <div className="col">
-                            <div onload = {show_point()}>
-                                <div id = "p" className = "point"></div>
-                                <div className = "pointdescription">10 Coins are need to use a hint.</div>
-                            </div>
-                            <button className="btn btn-warning mt-3" type="button">Hint</button>
-                        </div>
-                        <div className="col">
-                            <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
-                            <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
-                        </div>
-                    </div>
-                </form>
-                </div>
-            </div>
-        )
-    }
-
-
-
-    const { openedModule, setEditor, editorState } = useContext(Context)
-    const handleEditorStart = (e) => {
-        const module = e.currentTarget.getAttribute('module')
-        let content;
-        
-        // ToDo: Load all modules in modules folder
-
-        if (module === 'conditional_statements') {
-            content = conditionalStatementsJson
-        } else {
-            return
-        }
-        setOpenedModule({
-            id: module,
-            json: content
-        })
-    }
-    
-        /**
-     * Sends an email to the user with a link to reset their password
-     * @param {Event} e 
-     */
-        const show_hint = (e) => {
-            setModulePersonalization(true)
-            document.getElementById("mc-question-box3").style.display = "none";
-            document.getElementById("mc-question-box2").style.display = "block";
-            document.getElementById("hide_hint").style.visibility = "hidden"
-        }
-    
-        /**
-     * Sends an email to the user with a link to reset their password
-     * @param {Event} e 
-     */
-         const show_hint2 = (e) => {
-            // console.log({currentScore})
-            currentScore.then(value => {
-                // console.log(value);
-                // console.log(typeof value)
-                var point = parseInt(value)
-                const checked = solvedQuestionCheck(user, moduleName, currentPage)
-                console.log(checked)
-                checked.then(value => {
-                    console.log("CHECKED: ", value)
-                    if(value) {
-                        console.log("free?", value)
-                        setToast({
-                            title: "Good job for trying again",
-                            message: "⭐ Hint is freely offered"
-                        })
-                        setModulePersonalization(true)
-                        // e.preventDefault()
-                        console.log("here")
-                        document.getElementById("mc-question-box3").style.display = "none";
-                        document.getElementById("mc-question-box2").style.display = "block";
-                    }
-                    else {
-                        if(point >= 10) {
-                            takeStudentScore(user, 10)
-                            setToast({
-                                title: "Open the hint with the point!",
-                                message: "⭐ -10 score"
-                            })
-                            setModulePersonalization(true)
-                        // e.preventDefault()
-                        console.log("here")
-                        document.getElementById("mc-question-box3").style.display = "none";
-                        document.getElementById("mc-question-box2").style.display = "block";
-                        }
-                        else {
-                            setToast({
-                            title: "You don't have enought point!",
-                            message: "⭐ Need at least 10 points"
-                            })
-                        }
-                    }
-                })
-              });
-            
-        }
-
-      /**
-     * Sends an email to the user with a link to reset their password
-     * @param {Event} e 
-     */
-       const hide_hint = (e) => {
-        setShowLecture(false)
-        setModulePersonalization(false)
-        // e.preventDefault()
-        console.log("here")
-        document.getElementById("mc-question-box").style.visibility = "visible"
-        if (document.getElementById("prev01")!=null) {
-            document.getElementById("prev01").style.visibility = "visible"
-        }
-        if (document.getElementById("prev02")!=null) {
-            document.getElementById("prev02").style.visibility = "visible"
-        }
-        if (document.getElementById("next01")!=null) {
-            document.getElementById("next01").style.visibility = "visible"
-        }
-        if (document.getElementById("next02")!=null) {
-            document.getElementById("next02").style.visibility = "visible"
-        }
-        if (document.getElementById("page_number")!=null) {
-            document.getElementById("page_number").style.visibility = "visible"
-        }
-        // {pagination}
-    }
 
           /**
      * Sends an email to the user with a link to reset their password
@@ -783,7 +577,7 @@ function OpenModuleComponent(props) {
     
 
     const show_related = () => {
-        console.log("here")
+        
     }
 
     function show_point() {
@@ -791,224 +585,7 @@ function OpenModuleComponent(props) {
             document.getElementById('p').innerHTML =  'Current Coins: ' + value + ' </p>';
         });
     }
-    /**
-     * @param {Number} page 
-     * @returns {String} title of page
-     */
-    const checking_solved = (page) => {
-        const checked = solvedQuestionCheck(user, moduleName, 0)
-        const checked1 = solvedQuestionCheck(user, moduleName, 1)
-        const checked2 = solvedQuestionCheck(user, moduleName, 2)
-        const checked3 = solvedQuestionCheck(user, moduleName, 3)
-        const checked4 = solvedQuestionCheck(user, moduleName, 4)
-        const checked5 = solvedQuestionCheck(user, moduleName, 5)
-        const checked6 = solvedQuestionCheck(user, moduleName, 6)
-        const checked7 = solvedQuestionCheck(user, moduleName, 7)
-        const checked8 = solvedQuestionCheck(user, moduleName, 8)
-        const checked9 = solvedQuestionCheck(user, moduleName, 9)
-        const checked10 = solvedQuestionCheck(user, moduleName, 10)
-        const checked11 = solvedQuestionCheck(user, moduleName, 11)
-        const checked12 = solvedQuestionCheck(user, moduleName, 12)
-        const checked13 = solvedQuestionCheck(user, moduleName, 13)
-        const checked14 = solvedQuestionCheck(user, moduleName, 14)
-        const checked15 = solvedQuestionCheck(user, moduleName, 15)
-        const checked16 = solvedQuestionCheck(user, moduleName, 16)
-        const checked17 = solvedQuestionCheck(user, moduleName, 17)
-        const checked18 = solvedQuestionCheck(user, moduleName, 18)
-        const checked19 = solvedQuestionCheck(user, moduleName, 19)
-        checked.then((value) => {
-            if(value){
-                document.getElementById('question1_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question1_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked1.then((value) => {
-            if(value){
-                document.getElementById('question2_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question2_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked2.then((value) => {
-            console.log("checkedededed")
-            if(value){
-                document.getElementById('question3_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question3_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked3.then((value) => {
-            if(value){
-                document.getElementById('question4_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question4_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked4.then((value) => {
-            if(value){
-                document.getElementById('question5_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question5_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked5.then((value) => {
-            if(value){
-                document.getElementById('question6_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question6_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked6.then((value) => {
-            if(value){
-                document.getElementById('question7_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question7_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked7.then((value) => {
-            if(value){
-                document.getElementById('question8_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question8_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked8.then((value) => {
-            if(value){
-                document.getElementById('question9_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question9_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked9.then((value) => {
-            if(value){
-                document.getElementById('question10_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question10_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked10.then((value) => {
-            if(value){
-                document.getElementById('question11_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question11_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked11.then((value) => {
-            if(value){
-                document.getElementById('question12_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question12_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked12.then((value) => {
-            if(value){
-                document.getElementById('question13_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question13_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked13.then((value) => {
-            if(value){
-                document.getElementById('question14_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question14_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked14.then((value) => {
-            if(value){
-                document.getElementById('question15_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question15_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked15.then((value) => {
-            if(value){
-                document.getElementById('question16_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question16_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked16.then((value) => {
-            if(value){
-                document.getElementById('question17_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question17_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked17.then((value) => {
-            if(value){
-                document.getElementById('question18_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question18_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked18.then((value) => {
-            if(value){
-                document.getElementById('question19_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question19_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-        checked19.then((value) => {
-            if(value){
-                document.getElementById('question20_check').innerHTML = ' ✅ ' +'</p>';
-            }
-            else{
-                document.getElementById('question20_check').innerHTML = ' ❌ ' +'</p>';
-            }
-        });
-
-            
-        
-    }
-
-    /**
-     * @param {Number} page 
-     * @returns {String} title of page
-     */
-    const question_solve_check1 = (page) => {
-        const checked = solvedQuestionCheck(user, moduleName, currentPage)
-        var text = printChecking()
-        console.log("TEXT is HERE")
-        console.log(text)
-        checked.then(value => {
-            // console.log(value)
-            if(!value) {
-                // <span id = "quiz1" class = "quiz_list"> ❌ </span>
-                // return '❌'
-                // console.log("quiz1hehiehiehieh")
-                text = '❌'
-            }
-            else {
-                // <span id = "quiz1" class = "quiz_list"> ✅ </span>
-                // return '✅'
-                text = '✅'
-                // return 'checked'
-                // console.log("hhidfjlaidjfliadj;flijdal;ifjladjf;liasd;j;fl")
-            }
-        })
-        return text
-    }
+   
 
    
 
@@ -1030,22 +607,77 @@ function OpenModuleComponent(props) {
                             <SideBar sideOut={sideOut}/>
                         </div>
                     </div>
-                    <div id = "quiz_list" class = "quiz_list3">
-                    </div> 
+                <div id = "quiz_list" class = "quiz_list3">
+                </div> 
                 </div>
-                <div className="row flex-grow-1" id="quiz_box">  
-                    <div className = "quiz_box">
-                        <br></br>
-                        <div className = "quiz_inner_box">
-                            <h1>{getPageTitle(currentPage)}</h1>
-                            <h5>Question {currentPage + 1}/{moduleJson.body.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
-                            {/* {showPersonalization ? <PersonalizationComponent onClickYes={show_hint} onClickNo={_ => setModulePersonalization(false)} message="Do you want to see some lecture material on this topic?" /> : <></>} */}
-                            {elements}
-                            {questionsForm}
+            </div>
+            <div className="row flex-grow-1" id="quiz_box">  
+                <div className = "quiz_box">
+                    <br></br>
+                    <div className = "quiz_inner_box">
+                        <h1>{getPageTitle(currentPage)}</h1>
+                        <h5>Question {currentPage + 1}/{moduleJson.body.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
+                        {elements}
+                        <div id ="quiz_form">
+                        <div id="mc-question-box">
+                        <h3>Multiple-Choice Question</h3>
+                        <div class = "code-toolbox">
+                        <form onSubmit={formik.handleSubmit}>
+                            <p id="quiz_question">Question</p>
+                            <SyntaxHighlighter id="quiz_code" language="python">
+                                {code}
+                            </SyntaxHighlighter>
+                            <br />
+                            <div className="row d-flex align-items-end">
+                                <div className="col">
+                                    <div role="group">
+                                    <div key={0} id="answer_options" className="radio-group">
+                                        <input id = "radio-check-0" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="0" onChange={formik.handleChange} />
+                                        <label id="label-0" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-1" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="1" onChange={formik.handleChange} />
+                                        <label id="label-1" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-2" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="2" onChange={formik.handleChange} />
+                                        <label id="label-2" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-3" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="3" onChange={formik.handleChange} />
+                                        <label id="label-3" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-4" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="4" onChange={formik.handleChange} />
+                                        <label id="label-4" className="ms-2"></label>
+                                        <br/>
+                                        <input id = "radio-check-5" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value="5" onChange={formik.handleChange} />
+                                        <label id="label-5" className="ms-2"></label>
+                                        <br/>
+                                    </div>
+                                    </div>
+                                    <br/>
+                                    <button className="btn btn-success btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
+                                </div>
+                                <div className="col">
+                                    <div onload = {show_point()}>
+                                        <div id = "p" className = "point"></div>
+                                        <div className = "pointdescription">10 Coins are need to use a hint.</div>
+                                    </div>
+                                    <button className="btn btn-warning mt-3" type="button" onClick={() => setModalShow(true)}>Hint</button>
+                                </div>
+                                <div className="col">
+                                    <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
+                                    <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
+                                </div>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <HintModal
+                show={modalShow}
+                onHide={() => setModalShow(false)}
+            />
         </div>
     )
 }
