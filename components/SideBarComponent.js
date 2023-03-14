@@ -16,7 +16,7 @@ export default function SideBar(props) {
     return ( 
     
         <SideNav 
-            onSelect={selected=> {
+            onSelect={selected=> {  
                 console.log(selected)
                 if (selected == "quiz") {
                     props.sideOut("quiz")
@@ -34,15 +34,15 @@ export default function SideBar(props) {
                 </NavItem>
                 <NavItem eventKey="comp">
                     <NavIcon><FontAwesomeIcon icon="fa-solid fa-brain" /></NavIcon>
-                    <NavText>Competition</NavText>
+                    <NavText>Challenge</NavText>
                     <NavItem eventKey="top1">
-                        <NavText>Topic 1</NavText>
+                        <NavText>While Loop (easy)</NavText>
                     </NavItem>
                     <NavItem eventKey="top2">
-                        <NavText>Topic 2</NavText>
+                        <NavText>For Loop (med)</NavText>
                     </NavItem>
                     <NavItem eventKey="top3">
-                        <NavText>Topic 3</NavText>
+                        <NavText>Nested For Loop (hard)</NavText>
                     </NavItem>
                 </NavItem>
             </SideNav.Nav>
