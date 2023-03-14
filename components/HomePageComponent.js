@@ -7,6 +7,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { useContext } from 'react'
+import React, { useState } from 'react';
 import Context from '../context/Context'
 import RecentActivityComponent from './RecentActivityComponent'
 import conditionalStatementsJson from '../modules/conditional_statements.json'
@@ -61,6 +62,19 @@ export default function HomePageComponent() {
         }
     }
 
+    const [modal, setModal] = useState(false);
+
+    const toggleModal = () => {
+        console.log(modal)
+        setModal(!modal);
+    };
+
+    // if(modal) {
+    //     document.body.classList.add('active-modal')
+    // } else {
+    //     document.body.classList.remove('active-modal')
+    // }
+
     if (openedModule) {
         return (
             <div class="d-flex flex-row justify-content-between">
@@ -78,8 +92,34 @@ export default function HomePageComponent() {
             <div className="container mx-auto ">
                 <div class="d-flex justify-content-between">
                         <div className="flex-grow-1">
-                            <button type="button" class="btn btn-success mt-2 mb-4">How to Play</button>
+                            <button type="button" onClick={toggleModal} class="btn btn-success mt-2 mb-4">How to Play</button>
+                            {/* <button type="button" onClick={toggleModal} class="btn-modal">How to Play</button> */}
+                            {modal && (
+                                <div className="myModal">
+                                <div onClick={toggleModal} className="overlay"></div>
+                                <div className="modal-content">
+                                    <h2>How To Play!</h2>
+                                    <p></p>
+                                    <p>
+                                    Highlighted below are the modules section and the badges podium. You can start programming immediately
+                                    by clicking on any of the modules below. We cover a broad range of topics to help you understand 
+                                    programming better and make learning more intuitive. 
+                                    </p>
+                                    <p>
+                                    You can collect badges as you progress through the various topics we have to offer. You can compete with your 
+                                    peers to see who can get the most badges! 
+                                    </p>
+                                    <p>
+                                    Happy Coding!
+                                    </p>
+                                    <button className="btn btn-success mt-2 mb-4" onClick={toggleModal}>
+                                    CLOSE
+                                    </button>
+                                </div>
+                                </div>
+                            )}
                         </div>
+                        
                         <div className="flex-shrink-1">
                             <h5 class="mt-2 mb-4">12 <FontAwesomeIcon icon="fa-solid fa-coins" /></h5>
                         </div>
