@@ -2,6 +2,9 @@ import Editor from "@monaco-editor/react"
 import { useRef, useState, useContext, useEffect } from 'react'
 import Context from '../context/Context'
 import axios from 'axios'
+import CheckOutputComponent from "./CheckOutputComponent"
+import ChallengeQuestionComponent from "./ChallengeQuestionComponent"
+import { get } from "https"
 
 /**
  * The editor component for coding challenges.
@@ -15,16 +18,17 @@ export default function EditorComponent(props) {
     }
     
     // State for the code's output
-    const [output, setOutput] = useState([])
+    const [output, setOutput] = useState(["# Your output will be displayed here\n"])
 
     // State for if the code can be ran right now
     const [runEnabled, setRunEnabled] = useState(true)
 
     // State for the prompt
-    const [prompt, setPrompt] = useState([])
+    const [prompt, setPrompt] = useState()
 
     // Context used: editor state
     const { setEditorState } = useContext(Context)
+    const { challengeNumber, setChallengeNumber } = useContext(Context)
 
     // Ref for the editor element
     const editorRef = useRef()
@@ -57,11 +61,36 @@ export default function EditorComponent(props) {
         setEditorState(0)
     }
 
-    useEffect(() => {
-        const questionPrompt = "Using nested conditionals, write a program that prints out the following pattern:\nIf x is less than y, print \"x is less than y\"\nIf x is greater than y, print \"x is greater than y\"\nIf x and y are equal, print \"x and y must be equal\""
+    // get questions from firebase:
+    const readFireBaseData = () => {
+        const theData = 
+        [
+            {question: "While Loop Question 1",
+                answer: "me1"},
+            {question: "For Loop Question 2",
+                answer: "me2"},
+            {question: "Nested For Loop Question 3",
+                answer: "me3"},
+            {question: "Largest Number Question 4 big quesion goes here",
+                answer: "me4"},
+        ]
+        setPrompt(theData)
+    }
 
-        convertPromptIntoList(questionPrompt)
+    useEffect(() => {
+        console.log("Editor Mounted")
+        readFireBaseData()
     }, [])
+
+    // useEffect(() => {
+
+    //     // const QuestionData = ChallengeQuestionComponent()
+    //     setPrompt(ChallengeQuestionComponent())
+
+    //     // const questionPrompt = "Using nested conditionals, write a program that prints out the following pattern:\nIf x is less than y, print \"x is less than y\"\nIf x is greater than y, print \"x is greater than y\"\nIf x and y are equal, print \"x and y must be equal\""
+             
+    //     // convertPromptIntoList(questionPrompt)
+    // }, [challengeNumber])
 
     /**
      * Runs the code and updates the output.
@@ -125,11 +154,13 @@ export default function EditorComponent(props) {
           })
     }
 
+    console.log("hi", prompt)
+
     return (
         <div class="codingchall">
             <h2>Coding Challenge</h2>
             <ul>
-                {prompt}
+                {prompt && prompt[challengeNumber].question}
             </ul>
             <Editor
                 height="40vh"
@@ -141,13 +172,12 @@ export default function EditorComponent(props) {
             <div className="editor-output">
                 <div className="output">
                     <h3>Output</h3>
-                    <ul>{
-                        output[output.length - 1]
+                    <ul>
+                        {
+                        output.at(-1)
                         }
-                        {/* {output.map((item, index) => {
-                            return <li key={index}>{item}</li>
-                        })} */}
                     </ul>
+                    <CheckOutputComponent output={output} prompt={prompt}/>
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>

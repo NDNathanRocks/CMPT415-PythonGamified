@@ -29,6 +29,8 @@ export default function Home() {
    */
   const [editorState, setEditorState] = useState(0)
 
+  const [challengeNumber, setChallengeNumber] = useState(0)
+
   const contexts = {
     user,
     setUser,
@@ -45,7 +47,9 @@ export default function Home() {
     personalization,
     setPersonalization,
     challengeData,
-    setChallengeData
+    setChallengeData,
+    challengeNumber,
+    setChallengeNumber
   }
 
   useEffect(() => {

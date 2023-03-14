@@ -10,18 +10,24 @@ import SideNav, {
     NavText,
 }from "@trendmicro/react-sidenav";
 import "@trendmicro/react-sidenav/dist/react-sidenav.css";
+import { useContext } from 'react'
+import Context from '../context/Context'
 
 export default function SideBar(props) {
     library.add(fab, fas, far)
+
+    const { setChallengeNumber } = useContext(Context)
+
+
     return ( 
     
         <SideNav 
-            onSelect={selected=> {  
-                console.log(selected)
+            onSelect={selected=> { 
                 if (selected == "quiz") {
                     props.sideOut("quiz")
                 } else {
                     props.sideOut("else")
+                    setChallengeNumber(parseInt(selected))
                 }
             }}
             className="mysidenav"
@@ -35,14 +41,17 @@ export default function SideBar(props) {
                 <NavItem eventKey="comp">
                     <NavIcon><FontAwesomeIcon icon="fa-solid fa-brain" /></NavIcon>
                     <NavText>Challenge</NavText>
-                    <NavItem eventKey="top1">
+                    <NavItem eventKey="0">
                         <NavText>While Loop (easy)</NavText>
                     </NavItem>
-                    <NavItem eventKey="top2">
+                    <NavItem eventKey="1">
                         <NavText>For Loop (med)</NavText>
                     </NavItem>
-                    <NavItem eventKey="top3">
+                    <NavItem eventKey="2">
                         <NavText>Nested For Loop (hard)</NavText>
+                    </NavItem>
+                    <NavItem eventKey="3">
+                        <NavText>Largest Number (hard)</NavText>
                     </NavItem>
                 </NavItem>
             </SideNav.Nav>

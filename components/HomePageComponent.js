@@ -19,7 +19,7 @@ import SideBar from "./SideBarComponent";
 
 export default function HomePageComponent() {
     library.add(fab, fas, far)
-    const { openedModule, setOpenedModule, editorState } = useContext(Context)
+    const { openedModule, setOpenedModule, editorState, challengeNumber } = useContext(Context)
 
     const handleModuleStart = (e) => {
         console.log("here")
