@@ -8,18 +8,7 @@ import Context from '../context/Context'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import RecentActivityComponent from './RecentActivityComponent'
 import conditionalStatementsJson from '../modules/conditional_statements.json'
-import EditorComponent from './EditorComponent'
-import EasyEditorComponent from './EasyEditorComponent'
-import LeaderboardComponent from './LeaderboardComponent'
-import { Student, getStudent, createStudent } from '../data/Students'
-import validator from 'validator'
-import { v4 as uuidv4 } from "uuid"
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, sendSignInLinkToEmail, UserCredential } from "firebase/auth"
-import { auth } from '../firebase'
-import { v4 } from 'uuid'
-import { Quiz } from '../data/Quiz'
 import { Pages } from '../context/Pages'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
@@ -158,71 +147,11 @@ function OpenModuleComponent(props) {
 
     const createForm = () => {
         if (questions.length > 0 && currentQuestion < questions.length) {
-            questionsForm = (
-                <div id="mc-question-box">
-                    <h3>Multiple-Choice Question</h3>
-                    <div class = "code-toolbox">
-                    <form onSubmit={formik.handleSubmit}>
-                        {
-                            questions[currentQuestion].question.map((q, index) => {
-                                if (q.type === "code") {
-                                    return (
-                                        <SyntaxHighlighter language="javascript">
-                                            {q.value}
-                                        </SyntaxHighlighter>
-                                    )
-                                } else {
-                                    return (
-                                        <p>{q.value}</p>
-                                    )
-                                }
-                            })
-                        }
-                        <br />
-                        <div className="row d-flex align-items-end">
-                            <div className="col">
-                                <div role="group">
-                                {
-                                    questions[currentQuestion].answers.map((q, index) => {
-                                        return (
-                                            <div key={index} className="radio-group">
-                                                <input id = "radio-check" type="radio" className="form-check-input" disabled={formik.isSubmitting} name="picked" value={index} onChange={formik.handleChange} />
-                                                <span className="form-check-label">{q}</span>
-                                            </div>
-                                        )
-                                    })
-                                }
-                                </div>
-                                <br/>
-                                <button className="btn btn-success btn-block" type="submit" disabled={formik.isSubmitting}>Submit</button>
-                            </div>
-                            <div className="col">
-                                <div onload = {show_point()}>
-                                    <div id = "p" className = "point"></div>
-                                    <div className = "pointdescription">10 Coins are need to use a hint.</div>
-                                </div>
-                                <button className="btn btn-warning mt-3" type="button">Hint</button>
-                            </div>
-                            <div className="col">
-                                <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
-                                <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
-                            </div>
-                        </div>
-                    </form>
-                    </div>
-                </div>
-            )
-        }
-    }
-
-    const createForm2 = () => {
-        if (questions.length > 0 && currentQuestion < questions.length) {
             var formQuestion = document.getElementById("quiz_question")
             var formCode = document.getElementById("quiz_code")
             
             const quizQuestion = questions[currentQuestion].question
             const quizCode = questions[currentQuestion].code
-            console.log("helllooo?")
             formQuestion.innerHTML = `${quizQuestion}`
             formCode.innerHTML = `${quizCode}`
             
@@ -246,27 +175,12 @@ function OpenModuleComponent(props) {
             }
     
             setQuestions(tempQuestions)
-            createForm2()
+            createForm()
             
         })
     }
 
     getQuestions()
-
-
-    /**
-     * Returns the current page's module contents.
-     * @returns HTML for the module's contents.
-     */
-    const getCurrentMenuBody = () => {
-        const currentMenuBody = moduleJson.body.find(body => body.page === currentMenu)
-
-        if (currentMenuBody) {
-            return currentMenuBody.content
-        }
-
-        return []
-    }
 
     /**
      * Returns the current page's module contents.
@@ -582,21 +496,6 @@ function OpenModuleComponent(props) {
         return null
     }
 
-    /**
-     * Sets the module's personalization
-     * @param {*} value 
-     */
-    const setModulePersonalization = (value) => {
-        if (value) {
-            setShowLecture(value)
-            setShowPersonalization(false)
-            handleModuleStart()
-            setCurrentPage(currentPage)
-            setCurrentMenu(currentPage)
-        } else {
-            setShowPersonalization(false)
-        }
-    }
 
     /**
      * Retrieves student answers (INCOMPLETE)
@@ -633,24 +532,6 @@ function OpenModuleComponent(props) {
         return (<Skeleton count={5}></Skeleton>)
     }
 
-
-    const { openedModule, setEditor, editorState } = useContext(Context)
-    const handleEditorStart = (e) => {
-        const module = e.currentTarget.getAttribute('module')
-        let content;
-        
-        // ToDo: Load all modules in modules folder
-
-        if (module === 'conditional_statements') {
-            content = conditionalStatementsJson
-        } else {
-            return
-        }
-        setOpenedModule({
-            id: module,
-            json: content
-        })
-    }
 
           /**
      * Sends an email to the user with a link to reset their password
