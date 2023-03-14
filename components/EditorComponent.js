@@ -126,7 +126,7 @@ export default function EditorComponent(props) {
     }
 
     return (
-        <div>
+        <div class="codingchall">
             <h2>Coding Challenge</h2>
             <ul>
                 {prompt}
@@ -141,15 +141,17 @@ export default function EditorComponent(props) {
             <div className="editor-output">
                 <div className="output">
                     <h3>Output</h3>
-                    <ul>
-                        {output.map((item, index) => {
+                    <ul>{
+                        output[output.length - 1]
+                        }
+                        {/* {output.map((item, index) => {
                             return <li key={index}>{item}</li>
-                        })}
+                        })} */}
                     </ul>
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>
-                    <button type="button" className="btn btn-light" href="#" role="button" onClick={closeCodingChallenge}>Close Coding Challenge</button>
+                    {/* <button type="button" className="btn btn-light" href="#" role="button" onClick={closeCodingChallenge}>Close Coding Challenge</button> */}
                 </div>
             </div>
         </div>
