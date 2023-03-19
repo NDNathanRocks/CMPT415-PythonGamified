@@ -28,7 +28,7 @@ export default function EditorComponent(props) {
 
     // Context used: editor state
     const { setEditorState } = useContext(Context)
-    const { challengeNumber, setChallengeNumber } = useContext(Context)
+    const { challengeNumber, challengeData } = useContext(Context)
 
     // Ref for the editor element
     const editorRef = useRef()
@@ -41,45 +41,29 @@ export default function EditorComponent(props) {
      * Converts the prompt into a list of tasks
      * @param {*} questionPrompt 
      */
-    const convertPromptIntoList = (questionPrompt) => {
-        // break questionPrompt into lines
-        const lines = questionPrompt.split('\n')
-        const newList = []
+    // const convertPromptIntoList = (questionPrompt) => {
+    //     // break questionPrompt into lines
+    //     const lines = questionPrompt.split('\n')
+    //     const newList = []
 
-        // for each line, create a list item
-        lines.forEach((line) => {
-            newList.push(<li>{line}</li>)
-        })
+    //     // for each line, create a list item
+    //     lines.forEach((line) => {
+    //         newList.push(<li>{line}</li>)
+    //     })
 
-        setPrompt(newList)
-    }
+    //     setPrompt(newList)
+    // }
 
     /**
      * Closes the editor.
      */
-    const closeCodingChallenge = () => {
-        setEditorState(0)
-    }
-
-    // get questions from firebase:
-    const readFireBaseData = () => {
-        const theData = 
-        [
-            {question: "While Loop Question 1",
-                answer: "me1"},
-            {question: "For Loop Question 2",
-                answer: "me2"},
-            {question: "Nested For Loop Question 3",
-                answer: "me3"},
-            {question: "Largest Number Question 4 big quesion goes here",
-                answer: "me4"},
-        ]
-        setPrompt(theData)
-    }
+    // const closeCodingChallenge = () => {
+    //     setEditorState(0)
+    // }
 
     useEffect(() => {
+        // setPrompt(challengeData)
         console.log("Editor Mounted")
-        readFireBaseData()
     }, [])
 
     // useEffect(() => {
@@ -154,13 +138,13 @@ export default function EditorComponent(props) {
           })
     }
 
-    console.log("hi", prompt)
+    console.log(challengeData);
 
     return (
         <div class="codingchall">
             <h2>Coding Challenge</h2>
             <ul>
-                {prompt && prompt[challengeNumber].question}
+                {/* {challengeData && challengeData[challengeNumber].question} */}
             </ul>
             <Editor
                 height="40vh"
@@ -177,7 +161,7 @@ export default function EditorComponent(props) {
                         output.at(-1)
                         }
                     </ul>
-                    <CheckOutputComponent output={output} prompt={prompt}/>
+                    {/* <CheckOutputComponent output={output}/> */}
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>

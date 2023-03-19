@@ -20,7 +20,6 @@ export default function Home() {
   const [profileView, setProfileView] = useState(null)
   const [openedModule, setOpenedModule] = useState(null)
   const [personalization, setPersonalization] = useState(null)
-  const [challengeData, setChallengeData] = useState(null)
 
   /**
    * 0 => invisible
@@ -30,6 +29,7 @@ export default function Home() {
   const [editorState, setEditorState] = useState(0)
 
   const [challengeNumber, setChallengeNumber] = useState(0)
+  const [challengeData, setChallengeData] = useState({})
 
   const contexts = {
     user,

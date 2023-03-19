@@ -27,7 +27,7 @@ function ChallengeQuestionComponent() {
     // setTheData(
     const theData = 
         [
-            {question: "While Loop Question 1",
+            {question: "While Loop Question 1\nhihi",
                 answer: "me1"},
             {question: "For Loop Question 2",
                 answer: "me2"},

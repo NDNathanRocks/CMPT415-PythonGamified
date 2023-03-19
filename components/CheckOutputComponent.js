@@ -3,12 +3,12 @@ import Context from "../context/Context";
 
 function CheckOutputComponent(props) {
 
-    const { challengeNumber } = useContext(Context)
+    const { challengeNumber, challengeData } = useContext(Context)
 
-    const prompt = props.prompt;
+    // const prompt = props.prompt;
     const output = props.output;
-    if (prompt) {
-        var ans = prompt[challengeNumber].answer;
+    if (challengeData) {
+        var ans = challengeData[challengeNumber].answer;
     } else {
         var ans = "";
     }
