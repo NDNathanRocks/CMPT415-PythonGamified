@@ -201,9 +201,8 @@ function OpenModuleComponent(props) {
             const quizCode = questions[currentQuestion].code;
             const quizAnswerOptions = questions[currentQuestion].answers;
             formQuestion.innerHTML = `${quizQuestion}`;
-
-            setCode(quizCode)
-            // setCode("x = 10 \ny = 10 \nif x < y: \n    print(\"x is less than y\")")
+            
+            setCode(quizCode.replaceAll('\\n', '\n'));
 
             for (let i = 0; i < 6; i++) {
                 if (i < quizAnswerOptions.length) {
