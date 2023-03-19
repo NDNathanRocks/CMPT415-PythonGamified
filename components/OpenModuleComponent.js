@@ -98,12 +98,18 @@ function OpenModuleComponent(props) {
     // State for SideBar
     const [sideStr, setSideStr] = useState("quiz")
 
-    // Load personalization
+    // Load personalization and questions
     useEffect(() => {
         getPersonalization(user.uuid).then(p => {
             setPersonalization(p)
         })
+        getQuestions()
     }, [])
+
+    // Once questions have been loaded, then display in form
+    useEffect(() => {
+        createForm()
+    }, [questions])
 
     // Load module contents
     useEffect(() => {
@@ -126,6 +132,7 @@ function OpenModuleComponent(props) {
 
     useEffect(() => {
         retrieveStudentAnswers()
+        createForm()
     }, [currentQuestion])
 
     // Formik form for multiple choice questions
@@ -145,7 +152,6 @@ function OpenModuleComponent(props) {
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
                 checked.then(value => {
-                    console.log("Value", value)
                     if(!value) {
                         giveStudentScore(user, 50)
                         setToast({
@@ -218,12 +224,10 @@ function OpenModuleComponent(props) {
             }
     
             setQuestions(tempQuestions)
-            createForm()
             
         })
     }
 
-    // getQuestions()
 
     /**
      * Returns the current page's module contents.
@@ -425,9 +429,6 @@ function OpenModuleComponent(props) {
         const mcqs = getCurrentPageMcqs()
         const tempQuestions = []
 
-        // console.log("Test all")
-        // console.log(getAllConditionalStatements())
-
         for (let i = 0; i < mcqs.length; i++) {
             const mcq = mcqs[i]
             const question = {
@@ -539,7 +540,6 @@ function OpenModuleComponent(props) {
         if (!q) {
             return
         }
-        console.log("Getting q: " + q.id)
 
         getStudentAnswers(user, q.id).then(answers => {
             // console.log(answers)
