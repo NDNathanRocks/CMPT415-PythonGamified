@@ -150,8 +150,9 @@ function OpenModuleComponent(props) {
             const pick = values.picked
             const checked = solvedQuestionCheck(user, moduleName, currentPage)
             solvedQuestionUpdate(user, moduleName, currentPage)
-
             show_related()
+
+            var setDisable = false;
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
                 checked.then(value => {
@@ -171,7 +172,12 @@ function OpenModuleComponent(props) {
                 })
                 values.picked = ''
                 setShowNextBtn(true)
-            } else {
+
+                // If last question is right, disable form from submitting (student has finished the quiz)
+                if (currentQuestion >= (questions.length - 1)) {
+                    setDisable = true;
+                }
+            } else if (pick !== ''){
                 if (values.options.length > 2) {
                     formik.setSubmitting(false)
                 }
@@ -182,7 +188,7 @@ function OpenModuleComponent(props) {
                     setShowPersonalization(true)
                 }
             }
-            formik.setSubmitting(false)
+            formik.setSubmitting(setDisable)
         },
     })
 
@@ -622,7 +628,7 @@ function OpenModuleComponent(props) {
                     <br></br>
                     <div className = "quiz_inner_box">
                         <h1>{getPageTitle(currentPage)}</h1>
-                        <h5>Question {currentPage + 1}/{moduleJson.body.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
+                        <h5>Question {currentQuestion + 1}/{questions.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
                         {elements}
                         <div id ="quiz_form">
                         <div id="mc-question-box">
