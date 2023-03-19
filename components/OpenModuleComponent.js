@@ -94,6 +94,9 @@ function OpenModuleComponent(props) {
     const [code, setCode] = useState('')
 
     const [modalShow, setModalShow] = useState(false);
+
+    // State for showing next question button
+    const [showNextBtn, setShowNextBtn] = useState(false)
     
     // State for SideBar
     const [sideStr, setSideStr] = useState("quiz")
@@ -167,6 +170,7 @@ function OpenModuleComponent(props) {
                     }
                 })
                 values.picked = ''
+                setShowNextBtn(true)
             } else {
                 if (values.options.length > 2) {
                     formik.setSubmitting(false)
@@ -178,6 +182,7 @@ function OpenModuleComponent(props) {
                     setShowPersonalization(true)
                 }
             }
+            formik.setSubmitting(false)
         },
     })
 
@@ -558,6 +563,7 @@ function OpenModuleComponent(props) {
         }
 
         setCurrentQuestion(currentQuestion + 1)
+        setShowNextBtn(false)
         refreshFormik()
     }
 
@@ -664,7 +670,7 @@ function OpenModuleComponent(props) {
                                 </div>
                                 <div className="col">
                                     <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
-                                    <button className="btn btn-primary" hidden={!formik.isSubmitting || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
+                                    <button className="btn btn-primary" hidden={!showNextBtn || currentQuestion + 1 >= questions.length} onClick={nextQuestion}>Next question</button>
                                 </div>
                             </div>
                         </form>
