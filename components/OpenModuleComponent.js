@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { Modal } from "react-bootstrap";
-import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore } from '../data/Students'
+import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
 import { getQuizQuestionById, getAllConditionalStatements } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
 import PersonalizationComponent from './PersonalizationComponent'
@@ -153,16 +153,17 @@ function OpenModuleComponent(props) {
         },
         onSubmit: values => {
             const pick = values.picked
-            const checked = solvedQuestionCheck(user, moduleName, currentPage)
-            solvedQuestionUpdate(user, moduleName, currentPage)
+            const checked = solvedQuestionCheck(user, moduleName, currentQuestion)
             show_related()
 
             var setDisable = false;
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
                 checked.then(value => {
+                    // If question has never been solved before, give points and update question status
                     if(!value) {
                         giveStudentScore(user, 50)
+                        solvedQuestionUpdate(user, moduleName, currentQuestion, true)
                         setToast({
                             title: "Correct!",
                             message: "⭐ +50 score"
@@ -607,6 +608,14 @@ function OpenModuleComponent(props) {
    
 
     const displayHint = () => {
+        const hintChecked = questionHintCheck(user, moduleName, currentQuestion)
+        hintChecked.then(value => {
+            // If hint has not been bought before, reduce user score
+            if (!value) {
+                takeStudentScore(user, 10)
+            }
+        })
+        questionHintUpdate(user, moduleName, currentQuestion, true)
         setModalShow(true)
     }
 
