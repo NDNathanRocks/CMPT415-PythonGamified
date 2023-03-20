@@ -20,6 +20,8 @@ import SideBar from './SideBarComponent'
 // import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 
 function HintModal(props) {
+    const [hint, setHint] = useState('')
+    
     return (
       <Modal
         {...props}
@@ -29,11 +31,11 @@ function HintModal(props) {
       >
         <Modal.Header closeButton>
           <Modal.Title id="contained-modal-title-vcenter">
-            Question Hint
+            Hint - Question {props.title}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>Hint about question here.</p>
+          <p>{props.body}</p>
         </Modal.Body>
       </Modal>
     );
@@ -92,6 +94,9 @@ function OpenModuleComponent(props) {
 
     // State for the current explanation for the multiple choice question
     const [code, setCode] = useState('')
+
+    // State for the current hint for the multiple choice question
+    const [hint, setHint] = useState('')
 
     const [modalShow, setModalShow] = useState(false);
 
@@ -213,6 +218,8 @@ function OpenModuleComponent(props) {
                     currentRadio.style.display = "none";
                 }
             }
+
+            setHint(questions[currentQuestion].hint)
             
         }
     }
@@ -229,6 +236,7 @@ function OpenModuleComponent(props) {
                     answers: mcq.answerOptions,
                     correctAnswerIndex: mcq.answerIndex,
                     explanation: mcq.explanation,
+                    hint: mcq.hint,
                 }
                 tempQuestions.push(question)
             }
@@ -598,7 +606,9 @@ function OpenModuleComponent(props) {
     }
    
 
-   
+    const displayHint = () => {
+        setModalShow(true)
+    }
 
     const sideOut = (theStr) => {
         console.log("inside sideout!")
@@ -671,7 +681,7 @@ function OpenModuleComponent(props) {
                                         <div id = "p" className = "point"></div>
                                         <div className = "pointdescription">10 Coins are need to use a hint.</div>
                                     </div>
-                                    <button className="btn btn-warning mt-3" type="button" onClick={() => setModalShow(true)}>Hint</button>
+                                    <button className="btn btn-warning mt-3" type="button" onClick={displayHint}>Hint</button>
                                 </div>
                                 <div className="col">
                                     <p>{currentExplanation !== "" ? currentExplanation : ""}</p>
@@ -687,6 +697,8 @@ function OpenModuleComponent(props) {
             </div>
             <HintModal
                 show={modalShow}
+                title={currentQuestion + 1}
+                body={hint}
                 onHide={() => setModalShow(false)}
             />
         </div>
