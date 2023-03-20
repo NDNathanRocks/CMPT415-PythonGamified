@@ -228,14 +228,15 @@ export async function giveStudentScore(student, score) {
 
 
 /**
- * Adds to a student's score
+ * Updates whether a question has been solved or not
  * @param {Student} student 
- * @param {Number} score 
- * @returns {Boolean} true if score was successfully changed, false otherwise
+ * @param {String} title
+ * @param {Number} questionNumber 
+ * @param {Boolean} newVal
+ * @returns {Boolean} true if question was successfully updated, false otherwise
  */
- export async function solvedQuestionUpdate(student, title, questionNumber) {
+ export async function solvedQuestionUpdate(student, title, questionNumber, newVal) {
     const q = query(collection(db, "students"), where("email", "==", student.email))
-    console.log("1")
     const querySnapshot = await getDocs(q)
 
     if (querySnapshot.empty) {
@@ -246,61 +247,33 @@ export async function giveStudentScore(student, score) {
 
     const studentData = studentDoc.data()
     const currentQuestion = studentData.solved_question
-    const len = currentQuestion.length
-    var flag = false
-    var num = -1
-    console.log("length", len)
-    for (let i = 0; i < len; i++) {
-        if (currentQuestion[i]['title'] == title) {
-            console.log("2")
-            flag = true
-            num = i
-        }
+    
+    // Switch values from true/false to 0/1
+    var updateVal = 0
+    if (newVal) {
+        updateVal = 1
     }
-    if (flag) {
-        console.log("here2222")
-        console.log(currentQuestion[num]['l'])
-        console.log("question", questionNumber)
-        for(let i = 0; i < currentQuestion[num]['l'].length; i++) {
-            if(currentQuestion[num]['l'][i] == questionNumber) {
-                // console.log("3")
-                return true
-            }
-            else {
-                console.log("HIHIHI 4")
-                currentQuestion[num]['l'].push(questionNumber)
-                console.log(currentQuestion[num]['l'])
-                await updateDoc(studentDoc.ref, { solved_question: currentQuestion })
-                return true
-            }
-        }
-        // if (questionNumber in currentQuestion[num]['l']) {
-        //     console.log("3")
-        //     return true
-        // }
 
+    // If question number is outside of array size, append array
+    if (currentQuestion[title].length <= questionNumber) {
+        currentQuestion[title].append(updateVal)
+    } else {
+        // Update whether question has been solved or not
+        currentQuestion[title][questionNumber] = updateVal
     }
-    else {
-        console.log("here3333")
-        const l = [questionNumber]
-        currentQuestion.push({
-            title, l
-        })
-        await updateDoc(studentDoc.ref, { solved_question: currentQuestion })
-        return true
-    }
-    // console.log("heeeee")
-    // console.log(currentQuestion)
-    // await updateDoc(studentDoc.ref, { solved_question: currentQuestion })
-    // console.log(studentData.solved_question)
-    return false
+
+    // Update firebase with changes
+    await updateDoc(studentDoc.ref, { solved_question: currentQuestion })
+
+    return true
 }
 
 /**
- * Adds to a student's score
+ * Check whether a question has been solved or not
  * @param {Student} student 
- * @param {Number} score 
- * @returns {Boolean} true if score was successfully changed, false otherwise
+ * @param {String} title
+ * @param {Number} questionNumber 
+ * @returns {Boolean} true if question has been solved, false otherwise
  */
  export async function solvedQuestionCheck(student, title, questionNumber) {
     const q = query(collection(db, "students"), where("email", "==", student.email))
@@ -315,31 +288,17 @@ export async function giveStudentScore(student, score) {
 
     const studentData = studentDoc.data()
     const currentQuestion = studentData.solved_question
-    // console.log("current", currentQuestion[0]['l'][3])
-    const len = currentQuestion.length
-    var flag = false
-    var num = -1
-    // console.log("length", len)
-    for (let i = 0; i < len; i++) {
-        if (currentQuestion[i]['title'] == title) {
-            flag = true
-            num = i
-        }
+    
+    // If question number is outside of array size, return false 
+    if (currentQuestion[title].length <= questionNumber) {
+        return false
     }
-    if (flag) {
-        var check = false
-        for(let i = 0; i < currentQuestion[num]['l'].length; i++) {
-            if (questionNumber == currentQuestion[num]['l'][i]) {
-                check = true
-            } 
-        }
-        if (check) {
-            return true
-        }
-        else {
-            return false
-        }
+
+    // If a 1 for that question hint is found that means the hint has been bought already
+    if (currentQuestion[title][questionNumber] == 1) {
+        return true
     }
+
     return false
 }
 

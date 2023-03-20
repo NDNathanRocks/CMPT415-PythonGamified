@@ -153,16 +153,17 @@ function OpenModuleComponent(props) {
         },
         onSubmit: values => {
             const pick = values.picked
-            const checked = solvedQuestionCheck(user, moduleName, currentPage)
-            solvedQuestionUpdate(user, moduleName, currentPage)
+            const checked = solvedQuestionCheck(user, moduleName, currentQuestion)
             show_related()
 
             var setDisable = false;
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
                 checked.then(value => {
+                    // If question has never been solved before, give points and update question status
                     if(!value) {
                         giveStudentScore(user, 50)
+                        solvedQuestionUpdate(user, moduleName, currentQuestion, true)
                         setToast({
                             title: "Correct!",
                             message: "⭐ +50 score"
