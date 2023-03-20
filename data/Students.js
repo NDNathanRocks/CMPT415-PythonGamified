@@ -8,7 +8,7 @@ import { Friendship } from '../context/Friendship'
  * @typedef {Object} Student
  */
 export class Student {
-    constructor(uuid, name, email, anonymousName, isAnonymous, achievements, level, friends, score, solved_question) {
+    constructor(uuid, name, email, anonymousName, isAnonymous, achievements, level, friends, score, solved_question, question_hint) {
         this.uuid = uuid
         this.name = name
         this.email = email
@@ -19,6 +19,7 @@ export class Student {
         this.friends = friends
         this.score = score
         this.solved_question = []
+        this.question_hint = []
     }
 }
 
@@ -38,12 +39,13 @@ const studentConverter = {
             level: student.level,
             friends: student.friends,
             score: student.score,
-            solved_question : student.solved_question
+            solved_question : student.solved_question,
+            question_hint: student.question_hint
         }
     },
     fromFirestore: function (snapshot, options) {
         const data = snapshot.data(options)
-        return new Student(data.uuid, data.name, data.email, data.anonymous_name, data.is_anonymous, data.achievements, data.level, data.friends, data.score, data.solved_question)
+        return new Student(data.uuid, data.name, data.email, data.anonymous_name, data.is_anonymous, data.achievements, data.level, data.friends, data.score, data.solved_question, data.question_hint)
     }
 }
 
@@ -338,6 +340,67 @@ export async function giveStudentScore(student, score) {
             return false
         }
     }
+    return false
+}
+
+export async function questionHintUpdate(student, title, questionNumber, newVal) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentQuestion = studentData.question_hint
+
+    // Switch values from true/false to 0/1
+    var updateVal = 0
+    if (newVal) {
+        updateVal = 1
+    }
+
+    // If question number is outside of array size, append array
+    if (currentQuestion[title].length <= questionNumber) {
+        currentQuestion[title].append(updateVal)
+    } else {
+        // Update whether hint is bought or not
+        currentQuestion[title][questionNumber] = updateVal
+    }
+
+    // Update firebase with changes
+    await updateDoc(studentDoc.ref, { question_hint: currentQuestion })
+
+    return true
+
+}
+
+ export async function questionHintCheck(student, title, questionNumber) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    const studentData = studentDoc.data()
+    const currentQuestion = studentData.question_hint
+
+    // If question number is outside of array size, return false 
+    if (currentQuestion[title].length <= questionNumber) {
+        return false
+    }
+
+    // If a 1 for that question hint is found that means the hint has been bought already
+    if (currentQuestion[title][questionNumber] == 1) {
+        return true
+    }
+
     return false
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { Modal } from "react-bootstrap";
-import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore } from '../data/Students'
+import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
 import { getQuizQuestionById, getAllConditionalStatements } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
 import PersonalizationComponent from './PersonalizationComponent'
@@ -607,6 +607,14 @@ function OpenModuleComponent(props) {
    
 
     const displayHint = () => {
+        const hintChecked = questionHintCheck(user, moduleName, currentQuestion)
+        hintChecked.then(value => {
+            // If hint has not been bought before, reduce user score
+            if (!value) {
+                takeStudentScore(user, 10)
+            }
+        })
+        questionHintUpdate(user, moduleName, currentQuestion, true)
         setModalShow(true)
     }
 
