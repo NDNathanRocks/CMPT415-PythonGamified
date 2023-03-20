@@ -7,7 +7,7 @@ import { collection, query, where, getDocs, getDoc, setDoc, doc, updateDoc, serv
  * @typedef {Object} QuizQuestion
  */
 export class QuizQuestion {
-    constructor(topic, qid, question, code, answerOptions, answerIndex, explanation) {
+    constructor(topic, qid, question, code, answerOptions, answerIndex, explanation, hint) {
         this.topic = topic
         this.qid = qid
         this.question = question
@@ -15,6 +15,7 @@ export class QuizQuestion {
         this.answerOptions = answerOptions
         this.answerIndex = answerIndex
         this.explanation = explanation
+        this.hint = hint
     }
 }
 
@@ -31,13 +32,14 @@ const quizQuestionConverter = {
             code:  quizQuestion.code,
             answer_options: quizQuestion.answerOptions,
             answer_index:  quizQuestion.answerIndex,
-            explanation: quizQuestion.explanation
+            explanation: quizQuestion.explanation,
+            hint: quizQuestion.hint
 
         }
     },
     fromFirestore: function (snapshot, options) {
         const data = snapshot.data(options)
-        return new QuizQuestion(data.topic, data.qid, data.question, data.code, data.answer_options, data.answer_index, data.explanation)
+        return new QuizQuestion(data.topic, data.qid, data.question, data.code, data.answer_options, data.answer_index, data.explanation, data.hint)
     }
 }
 
