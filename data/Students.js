@@ -343,6 +343,14 @@ export async function giveStudentScore(student, score) {
     return false
 }
 
+/**
+ * Updates whether a question's hint has been bought or not
+ * @param {Student} student 
+ * @param {String} title
+ * @param {Number} questionNumber 
+ * @param {Boolean} newVal
+ * @returns {Boolean} true if hint was successfully updated, false otherwise
+ */
 export async function questionHintUpdate(student, title, questionNumber, newVal) {
     const q = query(collection(db, "students"), where("email", "==", student.email))
     const querySnapshot = await getDocs(q)
@@ -377,7 +385,14 @@ export async function questionHintUpdate(student, title, questionNumber, newVal)
 
 }
 
- export async function questionHintCheck(student, title, questionNumber) {
+/**
+ * Check whether a question's hint has been bought or not
+ * @param {Student} student 
+ * @param {String} title
+ * @param {Number} questionNumber 
+ * @returns {Boolean} true if hint was bought, false otherwise
+ */
+export async function questionHintCheck(student, title, questionNumber) {
     const q = query(collection(db, "students"), where("email", "==", student.email))
 
     const querySnapshot = await getDocs(q)
