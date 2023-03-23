@@ -7,7 +7,7 @@ import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { useContext } from 'react'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Context from '../context/Context'
 import RecentActivityComponent from './RecentActivityComponent'
 import conditionalStatementsJson from '../modules/conditional_statements.json'
@@ -19,7 +19,27 @@ import SideBar from "./SideBarComponent";
 
 export default function HomePageComponent() {
     library.add(fab, fas, far)
-    const { openedModule, setOpenedModule, editorState } = useContext(Context)
+    const { openedModule, setOpenedModule, editorState, setChallengeData, challengeData } = useContext(Context)
+
+    // get questions from firebase:
+    const readFireBaseData = () => {
+        setChallengeData([
+            {question: "While Loop Question 1",
+                answer: "me1"},
+            {question: "For Loop Question 2",
+                answer: "me2"},
+            {question: "Nested For Loop Question 3",
+                answer: "me3"},
+            {question: "Largest Number Question 4 big quesion goes here",
+                answer: "me4"},
+        ])
+    }
+
+    useEffect(() => {
+        readFireBaseData();
+        console.log("Home Page Mounted")
+        console.log(challengeData);
+    }, [])
 
     const handleModuleStart = (e) => {
         console.log("here")

@@ -2,6 +2,9 @@ import Editor from "@monaco-editor/react"
 import { useRef, useState, useContext, useEffect } from 'react'
 import Context from '../context/Context'
 import axios from 'axios'
+import CheckOutputComponent from "./CheckOutputComponent"
+import ChallengeQuestionComponent from "./ChallengeQuestionComponent"
+import { get } from "https"
 
 /**
  * The editor component for coding challenges.
@@ -15,16 +18,17 @@ export default function EditorComponent(props) {
     }
     
     // State for the code's output
-    const [output, setOutput] = useState([])
+    const [output, setOutput] = useState(["# Your output will be displayed here\n"])
 
     // State for if the code can be ran right now
     const [runEnabled, setRunEnabled] = useState(true)
 
     // State for the prompt
-    const [prompt, setPrompt] = useState([])
+    const [prompt, setPrompt] = useState()
 
     // Context used: editor state
     const { setEditorState } = useContext(Context)
+    const { challengeNumber, challengeData } = useContext(Context)
 
     // Ref for the editor element
     const editorRef = useRef()
@@ -37,31 +41,40 @@ export default function EditorComponent(props) {
      * Converts the prompt into a list of tasks
      * @param {*} questionPrompt 
      */
-    const convertPromptIntoList = (questionPrompt) => {
-        // break questionPrompt into lines
-        const lines = questionPrompt.split('\n')
-        const newList = []
+    // const convertPromptIntoList = (questionPrompt) => {
+    //     // break questionPrompt into lines
+    //     const lines = questionPrompt.split('\n')
+    //     const newList = []
 
-        // for each line, create a list item
-        lines.forEach((line) => {
-            newList.push(<li>{line}</li>)
-        })
+    //     // for each line, create a list item
+    //     lines.forEach((line) => {
+    //         newList.push(<li>{line}</li>)
+    //     })
 
-        setPrompt(newList)
-    }
+    //     setPrompt(newList)
+    // }
 
     /**
      * Closes the editor.
      */
-    const closeCodingChallenge = () => {
-        setEditorState(0)
-    }
+    // const closeCodingChallenge = () => {
+    //     setEditorState(0)
+    // }
 
     useEffect(() => {
-        const questionPrompt = "Using nested conditionals, write a program that prints out the following pattern:\nIf x is less than y, print \"x is less than y\"\nIf x is greater than y, print \"x is greater than y\"\nIf x and y are equal, print \"x and y must be equal\""
-
-        convertPromptIntoList(questionPrompt)
+        // setPrompt(challengeData)
+        console.log("Editor Mounted")
     }, [])
+
+    // useEffect(() => {
+
+    //     // const QuestionData = ChallengeQuestionComponent()
+    //     setPrompt(ChallengeQuestionComponent())
+
+    //     // const questionPrompt = "Using nested conditionals, write a program that prints out the following pattern:\nIf x is less than y, print \"x is less than y\"\nIf x is greater than y, print \"x is greater than y\"\nIf x and y are equal, print \"x and y must be equal\""
+             
+    //     // convertPromptIntoList(questionPrompt)
+    // }, [challengeNumber])
 
     /**
      * Runs the code and updates the output.
@@ -125,11 +138,13 @@ export default function EditorComponent(props) {
           })
     }
 
+    console.log(challengeData);
+
     return (
         <div class="codingchall">
             <h2>Coding Challenge</h2>
             <ul>
-                {prompt}
+                {/* {challengeData && challengeData[challengeNumber].question} */}
             </ul>
             <Editor
                 height="40vh"
@@ -141,13 +156,12 @@ export default function EditorComponent(props) {
             <div className="editor-output">
                 <div className="output">
                     <h3>Output</h3>
-                    <ul>{
-                        output[output.length - 1]
+                    <ul>
+                        {
+                        output.at(-1)
                         }
-                        {/* {output.map((item, index) => {
-                            return <li key={index}>{item}</li>
-                        })} */}
                     </ul>
+                    {/* <CheckOutputComponent output={output}/> */}
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>
