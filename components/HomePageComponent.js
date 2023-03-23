@@ -16,29 +16,63 @@ import EditorComponent from './EditorComponent'
 import EasyEditorComponent from './EasyEditorComponent'
 import LeaderboardComponent from './LeaderboardComponent'
 import SideBar from "./SideBarComponent";
+import Modal from './Modal';
+import { db } from '../firebase'
+import { collection, query, where, getDocs, getDoc, setDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 
 export default function HomePageComponent() {
     library.add(fab, fas, far)
-    const { openedModule, setOpenedModule, editorState, setChallengeData, challengeData } = useContext(Context)
+    const { openedModule, setOpenedModule, editorState, setChallengeQuestion } = useContext(Context)
+    const chalQuestionsRef = collection(db, "quiz-questions/conditional-statements/challenge")
 
-    // get questions from firebase:
-    const readFireBaseData = () => {
-        setChallengeData([
-            {question: "While Loop Question 1",
-                answer: "me1"},
-            {question: "For Loop Question 2",
-                answer: "me2"},
-            {question: "Nested For Loop Question 3",
-                answer: "me3"},
-            {question: "Largest Number Question 4 big quesion goes here",
-                answer: "me4"},
-        ])
-    }
 
     useEffect(() => {
+        // get questions from firebase:
+        const readFireBaseData = () => {
+
+            const getQuestionsList = async() => {
+                const data = await getDocs(chalQuestionsRef);
+                const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id}));
+                setChallengeQuestion(filteredData);
+            };
+        
+            // getQuestionsList()
+
+
+            setChallengeQuestion([
+                {question: "Write a program that prints 'x' if the number inside the variable 'x' is greater than 5.",
+                    answer: "7",
+                    hint: "Use an if statement to check if x > 5, this way you can compare x with the number 5 and see if its greater than or not.\nThen you can use the print statment inside the if statement by creating an indentation in the next line.",
+                    title: "If Statement (easy)",
+                    output: "my old output1 goes here",
+                    completed: true
+                },
+                {question: "For Loop Question 2",
+                    answer: "me2",
+                    hint: "hint2",
+                    title: "If Statement (med)",
+                    output: "my old output2 goes here",
+                    completed: false
+                },
+                {question: "Nested For Loop Question 3",
+                    answer: "me3",
+                    hint: "hint3",
+                    title: "If Statement (hard)",
+                    output: "my old output3 goes here",
+                    completed: false
+                },
+                {question: "Largest Number Question 4 big quesion goes here",
+                    answer: "me4",
+                    hint: "hint4",
+                    title: "While Loop (easy)",
+                    output: "my old output4 goes here",
+                    completed: true
+                },
+            ])
+        }
+
         readFireBaseData();
-        console.log("Home Page Mounted")
-        console.log(challengeData);
+        console.log("Home Page Mounted!")
     }, [])
 
     const handleModuleStart = (e) => {
@@ -82,18 +116,22 @@ export default function HomePageComponent() {
         }
     }
 
-    const [modal, setModal] = useState(false);
+    /**
+    * Modal Stuff
+    **/
+    const [open, setOpen] = useState(false);
+    function handleClose(){
+        setOpen (false);
+        console.log("modal close");
+    }
+    function handleOpen(){
+        setOpen(true);
+        console.log("modal open");
+    }
+    useEffect(() => {
+        console.log("changed open");
+    }, [open])
 
-    const toggleModal = () => {
-        console.log(modal)
-        setModal(!modal);
-    };
-
-    // if(modal) {
-    //     document.body.classList.add('active-modal')
-    // } else {
-    //     document.body.classList.remove('active-modal')
-    // }
 
     if (openedModule) {
         return (
@@ -112,32 +150,23 @@ export default function HomePageComponent() {
             <div className="container mx-auto ">
                 <div class="d-flex justify-content-between">
                         <div className="flex-grow-1">
-                            <button type="button" onClick={toggleModal} class="btn btn-success mt-2 mb-4">How to Play</button>
-                            {/* <button type="button" onClick={toggleModal} class="btn-modal">How to Play</button> */}
-                            {modal && (
-                                <div className="myModal">
-                                <div onClick={toggleModal} className="overlay"></div>
-                                <div className="modal-content">
-                                    <h2>How To Play!</h2>
-                                    <p></p>
-                                    <p>
-                                    Highlighted below are the modules section and the badges podium. You can start programming immediately
-                                    by clicking on any of the modules below. We cover a broad range of topics to help you understand 
-                                    programming better and make learning more intuitive. 
-                                    </p>
-                                    <p>
-                                    You can collect badges as you progress through the various topics we have to offer. You can compete with your 
-                                    peers to see who can get the most badges! 
-                                    </p>
-                                    <p>
-                                    Happy Coding!
-                                    </p>
-                                    <button className="btn btn-success mt-2 mb-4" onClick={toggleModal}>
-                                    CLOSE
-                                    </button>
-                                </div>
-                                </div>
-                            )}
+                            <button type="button" onClick={handleOpen} class="btn btn-success mt-2 mb-4">How to Play</button>
+                            <Modal open = {open} close = {handleClose}>
+                                <h2>How To Play!</h2>
+                                <p></p>
+                                <p>
+                                Highlighted below are the modules section and the badges podium. You can start programming immediately
+                                by clicking on any of the modules below. We cover a broad range of topics to help you understand 
+                                programming better and make learning more intuitive. 
+                                </p>
+                                <p>
+                                You can collect badges as you progress through the various topics we have to offer. You can compete with your 
+                                peers to see who can get the most badges! 
+                                </p>
+                                <p>
+                                Happy Coding!
+                                </p>
+                            </Modal>
                         </div>
                         
                         <div className="flex-shrink-1">

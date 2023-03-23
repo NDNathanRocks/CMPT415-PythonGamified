@@ -3,15 +3,12 @@ import Context from "../context/Context";
 
 function CheckOutputComponent(props) {
 
-    const { challengeNumber, challengeData } = useContext(Context)
+    const { challengeNumber, challengeQuestion } = useContext(Context)
 
     // const prompt = props.prompt;
     const output = props.output;
-    if (challengeData) {
-        var ans = challengeData[challengeNumber].answer;
-    } else {
-        var ans = "";
-    }
+    var ans = challengeQuestion[challengeNumber].answer;
+   
     if (typeof output.at(-1) == 'string') {
         var userAns = output.at(-1).toLowerCase().replace(/(\r\n|\n|\r)/gm, "");
     }

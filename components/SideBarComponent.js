@@ -16,7 +16,7 @@ import Context from '../context/Context'
 export default function SideBar(props) {
     library.add(fab, fas, far)
 
-    const { setChallengeNumber } = useContext(Context)
+    const { challengeNumber, setChallengeNumber, challengeQuestion } = useContext(Context)
 
 
     return ( 
@@ -42,16 +42,16 @@ export default function SideBar(props) {
                     <NavIcon><FontAwesomeIcon icon="fa-solid fa-brain" /></NavIcon>
                     <NavText>Challenge</NavText>
                     <NavItem eventKey="0">
-                        <NavText>While Loop (easy)</NavText>
+                        <NavText>{challengeQuestion[0].title}</NavText>
                     </NavItem>
                     <NavItem eventKey="1">
-                        <NavText>For Loop (med)</NavText>
+                        <NavText>{challengeQuestion[1].title}</NavText>
                     </NavItem>
                     <NavItem eventKey="2">
-                        <NavText>Nested For Loop (hard)</NavText>
+                        <NavText>{challengeQuestion[2].title}</NavText>
                     </NavItem>
                     <NavItem eventKey="3">
-                        <NavText>Largest Number (hard)</NavText>
+                        <NavText>{challengeQuestion[3].title}</NavText>
                     </NavItem>
                 </NavItem>
             </SideNav.Nav>

@@ -3,6 +3,7 @@ import { useRef, useState, useContext, useEffect } from 'react'
 import Context from '../context/Context'
 import axios from 'axios'
 import CheckOutputComponent from "./CheckOutputComponent"
+import Modal from "./Modal"
 import ChallengeQuestionComponent from "./ChallengeQuestionComponent"
 import { get } from "https"
 
@@ -17,6 +18,8 @@ export default function EditorComponent(props) {
         minimap: { enabled: false }
     }
     
+    const { challengeNumber, challengeQuestion } = useContext(Context)
+
     // State for the code's output
     const [output, setOutput] = useState(["# Your output will be displayed here\n"])
 
@@ -26,9 +29,12 @@ export default function EditorComponent(props) {
     // State for the prompt
     const [prompt, setPrompt] = useState()
 
+    // For RunCode Error Message
+    const [errorMessage, setErrorMessage] = useState("")
+    const [openErrorMessage, setOpenErrorMessage] = useState(false)
+
     // Context used: editor state
     const { setEditorState } = useContext(Context)
-    const { challengeNumber, challengeData } = useContext(Context)
 
     // Ref for the editor element
     const editorRef = useRef()
@@ -66,21 +72,11 @@ export default function EditorComponent(props) {
         console.log("Editor Mounted")
     }, [])
 
-    // useEffect(() => {
-
-    //     // const QuestionData = ChallengeQuestionComponent()
-    //     setPrompt(ChallengeQuestionComponent())
-
-    //     // const questionPrompt = "Using nested conditionals, write a program that prints out the following pattern:\nIf x is less than y, print \"x is less than y\"\nIf x is greater than y, print \"x is greater than y\"\nIf x and y are equal, print \"x and y must be equal\""
-             
-    //     // convertPromptIntoList(questionPrompt)
-    // }, [challengeNumber])
-
     /**
      * Runs the code and updates the output.
      */
     const runCode = (e) => {
-        e.preventDefault()
+        if (e) e.preventDefault();
         setRunEnabled(false)
 
         // For now, clearing output
@@ -106,7 +102,6 @@ export default function EditorComponent(props) {
           }
 
           // Send the code to the server
-
           axios.request(options).then(function (response) {
               const token = response.data.token
 
@@ -122,13 +117,25 @@ export default function EditorComponent(props) {
               
               axios.request(getOptions).then(function (response2) {
                 // Receive output and update state
+                const err = response2.data.stderr
+                if (err) {
+                    const buffErr = Buffer.from(err, 'base64')
+                    const message = buffErr.toString('ascii')
+                    console.log("Error:" + message);
+                    setErrorMessage(message)
+                    setOpenErrorMessage(true)
+                } else {
+                    setErrorMessage("")
+                    setOpenErrorMessage(false)
+                }
+
                 const out = response2.data.stdout
                 const b = Buffer.from(out, 'base64')
                 const s = b.toString('ascii')
                 setOutput([...output, s])
                 setRunEnabled(true)
               }).catch(function (error) {
-                alert("Error: " + error)
+                // alert("Error: " + error)
                 setRunEnabled(true)
               })
 
@@ -138,13 +145,59 @@ export default function EditorComponent(props) {
           })
     }
 
-    console.log(challengeData);
+    useEffect(() => {
+        setOutput([challengeQuestion[challengeNumber].output])
+    }, [challengeNumber])
+
+    /**
+    * Modal Stuff
+    **/
+    const [open, setOpen] = useState(false);
+    function handleClose(){
+        setOpen(false);
+        setOpenErrorMessage(false);
+    }
+    function handleOpen(){
+        setOpen(true);
+    }
+    useEffect(() => {
+        console.log("changed open");
+    }, [open])
+
+    const deduceErrorMessage = () => {
+        if (errorMessage == "") {return null}
+        
+        let text = errorMessage.split(" ");
+        let headerText = "Unknown Error";
+        let bodyText = "Im sorry, we were not able to figure out the error but you can always search it up on stack overflow! Below you will find the line giving more information about the error."
+        // if (text.indexOf("SyntaxError:")) {
+        //     headerText = SyntaxError
+        // } else if (text.indexOf("SyntaxError:"))
+        
+        for (let i = 0 ; i < text.length ; i++) {
+            if (text[i] == "SyntaxError:") {
+                headerText = "Syntax Error!"
+                bodyText = "A Syntax Error is a way of Python telling you you've got the grammar error. You might've missed something important for Python to understand the code you have written."
+            } else if(text[i] == "NameError:") {
+                headerText = "Naming Error!"
+                bodyText = "A Naming Error occurs when you call a function or a variable that is not defined/initialized earlier... Please refer back to your code and see if you have misspelt any function/variable names or have not declared them before you called them."
+            }
+        }
+        
+        return (
+            <div>
+                <p>{headerText}</p>
+                <p>{bodyText}</p>
+                <p>{errorMessage}</p>
+            </div>
+        )
+    }
 
     return (
         <div class="codingchall">
             <h2>Coding Challenge</h2>
             <ul>
-                {/* {challengeData && challengeData[challengeNumber].question} */}
+                {challengeQuestion[challengeNumber].question}
             </ul>
             <Editor
                 height="40vh"
@@ -161,10 +214,24 @@ export default function EditorComponent(props) {
                         output.at(-1)
                         }
                     </ul>
-                    {/* <CheckOutputComponent output={output}/> */}
+                    <CheckOutputComponent output={output}/>
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>
+                    <button type="button" className="btn btn-light" href="#" role="button" onClick={handleOpen}>Hint</button>
+                    <Modal open = {open} close = {handleClose}>
+                        <h2>Hint!</h2>
+                        <p></p>
+                        <p>{challengeQuestion[challengeNumber].hint}</p>
+                        <p>You have 190 more coins remaining... Keep coding to get more!</p>
+                        <p>Happy Coding!</p>
+                    </Modal>
+                    <Modal open = {openErrorMessage} close = {handleClose}>
+                        <h2>Error Check!</h2>
+                        <p></p>
+                        {deduceErrorMessage()}
+                    </Modal>
+                    {errorMessage != "" ? <button type="button" className="btn btn-light" href="#" role="button" onClick={() => {setOpenErrorMessage(true)}}>Error Check</button> : ""}
                     {/* <button type="button" className="btn btn-light" href="#" role="button" onClick={closeCodingChallenge}>Close Coding Challenge</button> */}
                 </div>
             </div>
