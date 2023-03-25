@@ -3,8 +3,10 @@ import { useRef, useState, useContext, useEffect } from 'react'
 import Context from '../context/Context'
 import axios from 'axios'
 import CheckOutputComponent from "./CheckOutputComponent"
-import Modal from "./Modal"
+// import Modal from "./Modal"
+import { Modal } from "react-bootstrap"
 import ChallengeQuestionComponent from "./ChallengeQuestionComponent"
+import { getQuestionsList, updateScore, solvedQuestionUpdate, checkHintUsedAndUpdate } from "../data/ChallengeQuestions"
 import { get } from "https"
 
 /**
@@ -18,7 +20,7 @@ export default function EditorComponent(props) {
         minimap: { enabled: false }
     }
     
-    const { challengeNumber, challengeQuestion } = useContext(Context)
+    const { challengeNumber, challengeQuestion, user, openedModule } = useContext(Context)
 
     // State for the code's output
     const [output, setOutput] = useState(["# Your output will be displayed here\n"])
@@ -31,7 +33,8 @@ export default function EditorComponent(props) {
 
     // For RunCode Error Message
     const [errorMessage, setErrorMessage] = useState("")
-    const [openErrorMessage, setOpenErrorMessage] = useState(false)
+    const [modalHintShow, setModalHintShow] = useState(false);
+    const [modalErrShow, setModalErrShow] = useState(false);
 
     // Context used: editor state
     const { setEditorState } = useContext(Context)
@@ -44,28 +47,11 @@ export default function EditorComponent(props) {
     }
 
     /**
-     * Converts the prompt into a list of tasks
-     * @param {*} questionPrompt 
-     */
-    // const convertPromptIntoList = (questionPrompt) => {
-    //     // break questionPrompt into lines
-    //     const lines = questionPrompt.split('\n')
-    //     const newList = []
-
-    //     // for each line, create a list item
-    //     lines.forEach((line) => {
-    //         newList.push(<li>{line}</li>)
-    //     })
-
-    //     setPrompt(newList)
-    // }
-
-    /**
      * Closes the editor.
      */
-    // const closeCodingChallenge = () => {
-    //     setEditorState(0)
-    // }
+    const closeCodingChallenge = () => {
+        setEditorState(0)
+    }
 
     useEffect(() => {
         // setPrompt(challengeData)
@@ -123,16 +109,23 @@ export default function EditorComponent(props) {
                     const message = buffErr.toString('ascii')
                     console.log("Error:" + message);
                     setErrorMessage(message)
-                    setOpenErrorMessage(true)
+                    setModalErrShow(true)
                 } else {
                     setErrorMessage("")
-                    setOpenErrorMessage(false)
+                    setModalErrShow(false)
                 }
-
                 const out = response2.data.stdout
                 const b = Buffer.from(out, 'base64')
                 const s = b.toString('ascii')
                 setOutput([...output, s])
+                if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === challengeQuestion[challengeNumber].answer && challengeQuestion[challengeNumber].completed != true) {
+                    if (solvedQuestionUpdate(user, "conditional_statements", challengeNumber)) {
+                        //increase score
+                        updateScore(user, 50)
+                        console.log("increasing score!")
+                        challengeQuestion[challengeNumber].completed = true
+                    }
+                }
                 setRunEnabled(true)
               }).catch(function (error) {
                 // alert("Error: " + error)
@@ -143,6 +136,7 @@ export default function EditorComponent(props) {
               alert("Error: " + error)
               setRunEnabled(true)
           })
+        
     }
 
     useEffect(() => {
@@ -152,17 +146,42 @@ export default function EditorComponent(props) {
     /**
     * Modal Stuff
     **/
-    const [open, setOpen] = useState(false);
-    function handleClose(){
-        setOpen(false);
-        setOpenErrorMessage(false);
-    }
     function handleOpen(){
-        setOpen(true);
+        checkHintUsedAndUpdate(user, openedModule.id, challengeNumber)
+        setModalHintShow(true)
     }
-    useEffect(() => {
-        console.log("changed open");
-    }, [open])
+
+    function HintModal(props) {        
+        return (
+          <Modal
+                {...props}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+          >
+            <Modal.Header closeButton>
+                <Modal.Title id="contained-modal-title-vcenter"> Hint - Question {props.title} </Modal.Title> 
+            </Modal.Header>
+            <Modal.Body> <p>{props.body}</p> </Modal.Body>
+          </Modal>
+        );
+    }
+
+    function ErrModal(props) {        
+        return (
+            <Modal
+                {...props}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
+            <Modal.Header closeButton>
+                <Modal.Title id="contained-modal-title-vcenter"> Error Check - Question {props.title} </Modal.Title> 
+            </Modal.Header>
+            <Modal.Body> <p>{props.body}</p> </Modal.Body>
+            </Modal>
+        );
+    }
 
     const deduceErrorMessage = () => {
         if (errorMessage == "") {return null}
@@ -173,7 +192,6 @@ export default function EditorComponent(props) {
         // if (text.indexOf("SyntaxError:")) {
         //     headerText = SyntaxError
         // } else if (text.indexOf("SyntaxError:"))
-        
         for (let i = 0 ; i < text.length ; i++) {
             if (text[i] == "SyntaxError:") {
                 headerText = "Syntax Error!"
@@ -183,7 +201,6 @@ export default function EditorComponent(props) {
                 bodyText = "A Naming Error occurs when you call a function or a variable that is not defined/initialized earlier... Please refer back to your code and see if you have misspelt any function/variable names or have not declared them before you called them."
             }
         }
-        
         return (
             <div>
                 <p>{headerText}</p>
@@ -218,21 +235,20 @@ export default function EditorComponent(props) {
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>
+                    <HintModal
+                        show={modalHintShow}
+                        title={challengeNumber + 1}
+                        body={challengeQuestion[challengeNumber].hint}
+                        onHide={() => setModalHintShow(false)}
+                    />
                     <button type="button" className="btn btn-light" href="#" role="button" onClick={handleOpen}>Hint</button>
-                    <Modal open = {open} close = {handleClose}>
-                        <h2>Hint!</h2>
-                        <p></p>
-                        <p>{challengeQuestion[challengeNumber].hint}</p>
-                        <p>You have 190 more coins remaining... Keep coding to get more!</p>
-                        <p>Happy Coding!</p>
-                    </Modal>
-                    <Modal open = {openErrorMessage} close = {handleClose}>
-                        <h2>Error Check!</h2>
-                        <p></p>
-                        {deduceErrorMessage()}
-                    </Modal>
-                    {errorMessage != "" ? <button type="button" className="btn btn-light" href="#" role="button" onClick={() => {setOpenErrorMessage(true)}}>Error Check</button> : ""}
-                    {/* <button type="button" className="btn btn-light" href="#" role="button" onClick={closeCodingChallenge}>Close Coding Challenge</button> */}
+                    <ErrModal
+                        show={modalErrShow}
+                        title={challengeNumber + 1}
+                        body={deduceErrorMessage()}
+                        onHide={() => setModalErrShow(false)}
+                    />
+                    {errorMessage != "" ? <button type="button" className="btn btn-light" href="#" role="button" onClick={() => {setModalErrShow(true)}}>Error Check</button> : ""}
                 </div>
             </div>
         </div>

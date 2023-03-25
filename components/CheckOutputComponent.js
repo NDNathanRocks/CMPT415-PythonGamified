@@ -1,19 +1,18 @@
 import React, { useContext } from "react";
 import Context from "../context/Context";
+import { solvedQuestionUpdate } from "../data/ChallengeQuestions"
 
 function CheckOutputComponent(props) {
 
     const { challengeNumber, challengeQuestion } = useContext(Context)
 
-    // const prompt = props.prompt;
     const output = props.output;
     var ans = challengeQuestion[challengeNumber].answer;
    
     if (typeof output.at(-1) == 'string') {
         var userAns = output.at(-1).toLowerCase().replace(/(\r\n|\n|\r)/gm, "");
     }
-    
-
+  
     return(
         <div>
             {   

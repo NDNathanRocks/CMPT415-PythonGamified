@@ -37,8 +37,6 @@ function Modal (props) {
         backgroundColor: 'rgba(0, 0, 0, .7)',
         zIndex: 1000
     }
-    
-    console.log("inside modal");
   
     return (
         <>

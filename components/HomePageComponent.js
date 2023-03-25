@@ -16,7 +16,8 @@ import EditorComponent from './EditorComponent'
 import EasyEditorComponent from './EasyEditorComponent'
 import LeaderboardComponent from './LeaderboardComponent'
 import SideBar from "./SideBarComponent";
-import Modal from './Modal';
+// import Modal from './Modal';
+import { Modal } from "react-bootstrap"
 import { db } from '../firebase'
 import { collection, query, where, getDocs, getDoc, setDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
 
@@ -24,7 +25,6 @@ export default function HomePageComponent() {
     library.add(fab, fas, far)
     const { openedModule, setOpenedModule, editorState, setChallengeQuestion } = useContext(Context)
     const chalQuestionsRef = collection(db, "quiz-questions/conditional-statements/challenge")
-
 
     useEffect(() => {
         // get questions from firebase:
@@ -38,14 +38,13 @@ export default function HomePageComponent() {
         
             // getQuestionsList()
 
-
             setChallengeQuestion([
                 {question: "Write a program that prints 'x' if the number inside the variable 'x' is greater than 5.",
                     answer: "7",
                     hint: "Use an if statement to check if x > 5, this way you can compare x with the number 5 and see if its greater than or not.\nThen you can use the print statment inside the if statement by creating an indentation in the next line.",
                     title: "If Statement (easy)",
                     output: "my old output1 goes here",
-                    completed: true
+                    completed: false
                 },
                 {question: "For Loop Question 2",
                     answer: "me2",
@@ -76,7 +75,6 @@ export default function HomePageComponent() {
     }, [])
 
     const handleModuleStart = (e) => {
-        console.log("here")
         const module = e.currentTarget.getAttribute('module')
         let content;
 
@@ -119,19 +117,42 @@ export default function HomePageComponent() {
     /**
     * Modal Stuff
     **/
+    const [modalHowToShow, setModalHowToShow] = useState(false);
     const [open, setOpen] = useState(false);
     function handleClose(){
         setOpen (false);
-        console.log("modal close");
     }
     function handleOpen(){
         setOpen(true);
-        console.log("modal open");
     }
-    useEffect(() => {
-        console.log("changed open");
-    }, [open])
-
+    function HowToModal(props) {        
+        return (
+          <Modal
+                {...props}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+          >
+            <Modal.Header closeButton>
+                <Modal.Title id="contained-modal-title-vcenter"> {props.title} </Modal.Title> 
+            </Modal.Header>
+            <Modal.Body> 
+                <p>
+                    Highlighted below are the modules section and the badges podium. You can start programming immediately
+                    by clicking on any of the modules below. We cover a broad range of topics to help you understand 
+                    programming better and make learning more intuitive. 
+                    </p>
+                    <p>
+                    You can collect badges as you progress through the various topics we have to offer. You can compete with your 
+                    peers to see who can get the most badges! 
+                    </p>
+                    <p>
+                    Happy Coding!
+                </p>
+            </Modal.Body>
+          </Modal>
+        );
+    }
 
     if (openedModule) {
         return (
@@ -150,23 +171,12 @@ export default function HomePageComponent() {
             <div className="container mx-auto ">
                 <div class="d-flex justify-content-between">
                         <div className="flex-grow-1">
-                            <button type="button" onClick={handleOpen} class="btn btn-success mt-2 mb-4">How to Play</button>
-                            <Modal open = {open} close = {handleClose}>
-                                <h2>How To Play!</h2>
-                                <p></p>
-                                <p>
-                                Highlighted below are the modules section and the badges podium. You can start programming immediately
-                                by clicking on any of the modules below. We cover a broad range of topics to help you understand 
-                                programming better and make learning more intuitive. 
-                                </p>
-                                <p>
-                                You can collect badges as you progress through the various topics we have to offer. You can compete with your 
-                                peers to see who can get the most badges! 
-                                </p>
-                                <p>
-                                Happy Coding!
-                                </p>
-                            </Modal>
+                            <button type="button" onClick={() => setModalHowToShow(true)} class="btn btn-success mt-2 mb-4">How to Play</button>
+                            <HowToModal
+                                show={modalHowToShow}
+                                title={"How To Play!"}
+                                onHide={() => setModalHowToShow(false)}
+                            />
                         </div>
                         
                         <div className="flex-shrink-1">

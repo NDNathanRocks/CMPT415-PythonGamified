@@ -620,7 +620,6 @@ function OpenModuleComponent(props) {
     }
 
     const sideOut = (theStr) => {
-        console.log("inside sideout!")
         if (theStr == "quiz") {
             openQuiz()
         } else {
