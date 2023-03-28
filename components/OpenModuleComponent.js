@@ -9,6 +9,7 @@ import SyntaxHighlighter from 'react-syntax-highlighter'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
 import { Pages } from '../context/Pages'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
@@ -421,8 +422,11 @@ function OpenModuleComponent(props) {
                                 </div>
                                 <div className="col">
                                     <div onload = {show_point()}>
-                                        <div id = "p" className = "point"></div>
-                                        <div className = "pointdescription">10 Coins are need to use a hint.</div>
+                                        <div class="d-flex justify-content-start">
+                                            <div id = "p" className = "point me-2"></div>
+                                            <FontAwesomeIcon icon="fa-solid fa-coins" />
+                                        </div>
+                                        <div className = "pointdescription">10 <FontAwesomeIcon icon="fa-solid fa-coins" /> are need to use a hint.</div>
                                     </div>
                                     <button className="btn btn-warning mt-3" type="button" onClick={displayHint}>Hint</button>
                                 </div>
