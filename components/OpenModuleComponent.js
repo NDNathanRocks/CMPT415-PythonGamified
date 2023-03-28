@@ -1,17 +1,14 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { Modal } from "react-bootstrap";
 import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
-import { getQuizQuestionById, getAllConditionalStatements } from '../data/QuizQuestions'
+import { getAllConditionalStatements } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
-import PersonalizationComponent from './PersonalizationComponent'
 import { useFormik } from 'formik'
 import Context from '../context/Context'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import conditionalStatementsJson from '../modules/conditional_statements.json'
 import { Pages } from '../context/Pages'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
@@ -52,8 +49,6 @@ function OpenModuleComponent(props) {
 
     const moduleName = props.file.id
 
-    let questionsForm = null
-
     // Context: user, editor state, challenge data, personalization, toast
     const { user, page, setPage, setEditorState, setChallengeData, personalization, setPersonalization, setToast } = useContext(Context)
 
@@ -70,9 +65,6 @@ function OpenModuleComponent(props) {
 
     // State for pagination HTML
     const [pagination, setPagination] = useState([])
-
-    // State for estimated lesson time
-    const [lessonTime, setLessonTime] = useState('')
 
     // State for lecture visibility
     const [showLecture, setShowLecture] = useState(false)
@@ -122,19 +114,16 @@ function OpenModuleComponent(props) {
     // Load module contents
     useEffect(() => {
         handleModuleStart()
-        calculateLessonTime()
         handlePagination()
     }, [currentPage])
 
     useEffect(() => {
         handleModuleStart()
-        calculateLessonTime()
         handlePagination()
     }, [currentMenu])
 
     useEffect(() => {
         handleModuleStart()
-        calculateLessonTime()
         handlePagination()
     }, [showLecture])
 
@@ -506,26 +495,6 @@ function OpenModuleComponent(props) {
 
         document.getElementById("quiz_box").style.display = "block";
     }
-
-    /**
-     * Estimates the time it takes to read the lecture notes.
-     */
-    const calculateLessonTime = () => {
-        let text = ''
-
-        for (let i = 0; i < elements.length; i++) {
-            text += elements[i].innerText
-        }
-
-        text = text.replace(/<[^>]+>/g, '')
-
-        // Average adult is 225wpm; since this is coding, we will go
-        // with a lower wpm
-        const wpm = 185
-        const words = text.trim().split(/\s+/).length
-        const time = Math.ceil(words / wpm)
-        setLessonTime(time + " minute(s)")
-    }
     
     /**
      * Returns all challenges in the module.
@@ -645,11 +614,10 @@ function OpenModuleComponent(props) {
                     <br></br>
                     <div className = "quiz_inner_box">
                         <h1>{getPageTitle(currentPage)}</h1>
-                        <h5>Question {currentQuestion + 1}/{questions.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
+                        <h5>Question {currentQuestion + 1}/{questions.length}</h5>
                         {elements}
                         <div id ="quiz_form">
                         <div id="mc-question-box">
-                        <h3>Multiple-Choice Question</h3>
                         <div class = "code-toolbox">
                         <form onSubmit={formik.handleSubmit}>
                             <p id="quiz_question">Question</p>
