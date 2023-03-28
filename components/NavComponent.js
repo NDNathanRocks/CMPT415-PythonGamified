@@ -120,7 +120,7 @@ export default function NavComponent(props) {
 
     return (
         <div className="container">
-            <nav className="navbar fixed-top navbar-expand-lg navbar-light bg-light">
+            <nav className="navbar fixed-top navbar-expand-lg navbar-light nav_blue_background p-3">
                 <div className="container-fluid">
                     <a className="navbar-brand" href="#">Intro. to Python</a>
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">

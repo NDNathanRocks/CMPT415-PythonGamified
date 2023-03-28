@@ -1,12 +1,16 @@
 @import url('../node_modules/font-awesome/css/font-awesome.min.css');
 
+.nav_blue_background {
+  background-color: #89ABE3FF;
+}
+
 .codingchall {
   margin-left: -1500px;
 }
 
 .mysidenav {
   background-color: grey !important;
-  margin-top: 3% !important;
+  margin-top: 5% !important;
 }
 
 .form-signin {
@@ -276,4 +280,8 @@
 
 .sidebar_row:hover {
   background: #ebf3fc;
+}
+
+.home_background {
+  background: #FCF6F5FF;
 }
