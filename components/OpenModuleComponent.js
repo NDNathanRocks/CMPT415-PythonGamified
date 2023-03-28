@@ -36,6 +36,27 @@ function HintModal(props) {
     );
   }
 
+function CompletedModal(props) {
+    return (
+      <Modal
+        {...props}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            <h2 class="mt-3">🎉 Congratulations! 🎉</h2>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h5>You have completed all questions in the <b>{props.title}</b> module!</h5>
+          <p>You may redo this quiz any time for review.</p>
+        </Modal.Body>
+      </Modal>
+    );
+}
+
 /**
  * Component for a module's contents and multiple choice questions.
  * @param {*} props 
@@ -43,7 +64,6 @@ function HintModal(props) {
  */
 function OpenModuleComponent(props) {
     library.add(fab, fas, far)
-    const moduleJson = ""
 
     const moduleName = props.title
 
@@ -76,7 +96,11 @@ function OpenModuleComponent(props) {
     // State for the current hint for the multiple choice question
     const [hint, setHint] = useState('')
 
-    const [modalShow, setModalShow] = useState(false);
+    // State for the the visibility of the hint modal
+    const [hintModalShow, setHintModalShow] = useState(false);
+
+    // State for the the visibility of the completed modal
+    const [completedModalShow, setCompletedModalShow] = useState(false);
 
     // State for showing next question button
     const [showNextBtn, setShowNextBtn] = useState(false)
@@ -141,6 +165,7 @@ function OpenModuleComponent(props) {
                 // If last question is right, disable form from submitting (student has finished the quiz)
                 if (currentQuestion >= (questions.length - 1)) {
                     setDisable = true;
+                    setCompletedModalShow(true)
                 }
             } else if (pick !== ''){
                 if (values.options.length > 2) {
@@ -327,7 +352,7 @@ function OpenModuleComponent(props) {
             }
         })
         questionHintUpdate(user, moduleName, currentQuestion, true)
-        setModalShow(true)
+        setHintModalShow(true)
     }
 
     const sideOut = (theStr) => {
@@ -414,10 +439,15 @@ function OpenModuleComponent(props) {
                 </div>
             </div>
             <HintModal
-                show={modalShow}
+                show={hintModalShow}
                 title={currentQuestion + 1}
                 body={hint}
-                onHide={() => setModalShow(false)}
+                onHide={() => setHintModalShow(false)}
+            />
+            <CompletedModal
+                show={completedModalShow}
+                title={getPageTitle()}
+                onHide={() => setCompletedModalShow(false)}
             />
         </div>
     )
