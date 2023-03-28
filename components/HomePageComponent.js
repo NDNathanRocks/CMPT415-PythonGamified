@@ -1,5 +1,3 @@
-import ModulesComponent from "./ModulesComponent";
-import ModulesListComponent from "./ModulesListComponent";
 import BadgesComponent from "./BadgesComponent";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
@@ -10,7 +8,6 @@ import { useContext } from 'react'
 import React, { useState, useEffect } from 'react';
 import Context from '../context/Context'
 import RecentActivityComponent from './RecentActivityComponent'
-import conditionalStatementsJson from '../modules/conditional_statements.json'
 import OpenModuleComponent from './OpenModuleComponent'
 import EditorComponent from './EditorComponent'
 import EasyEditorComponent from './EasyEditorComponent'
