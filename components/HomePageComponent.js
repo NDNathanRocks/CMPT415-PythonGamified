@@ -178,7 +178,7 @@ export default function HomePageComponent() {
                         </div>
                         <div class="row" >
                             <div class="col-sm-6">
-                                <div href="#" class="card modules_card" module="conditional_statements" onClick={handleModuleStart}>
+                                <div href="#" class="card modules_card" module="conditional-statements" onClick={handleModuleStart}>
                                     <div class="card-body">
                                         <h1 class="d-flex justify-content-center mb-3"><FontAwesomeIcon icon="fa-solid fa-code-branch" /></h1>
                                         <h5 class="card-title">Conditional Statements</h5>
@@ -192,7 +192,7 @@ export default function HomePageComponent() {
                                 </div>
                             </div>
                             <div class="col-sm-6">
-                                <div href="#" class="card modules_card" module="conditional_statements" onClick={handleModuleStart}>
+                                <div href="#" class="card modules_card" module="conditional-statements" onClick={handleModuleStart}>
                                     <div class="card-body">
                                         <h1 class="d-flex justify-content-center mb-3"><FontAwesomeIcon icon="fa-solid fa-rotate-left" /></h1>
                                         <h5 class="card-title">Loops</h5>

@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { Modal } from "react-bootstrap";
-import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
-import { getAllConditionalStatements } from '../data/QuizQuestions'
+import { giveStudentScore, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
+import { getAllModuleQuestions } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
 import { useFormik } from 'formik'
 import Context from '../context/Context'
@@ -190,7 +190,7 @@ function OpenModuleComponent(props) {
      * Asynchronously pull questions from firebase and load them
      */
     const getQuestions = () => {
-        getAllConditionalStatements().then(allQuestions => {
+        getAllModuleQuestions(moduleName).then(allQuestions => {
             let tempQuestions = []
             for (let i = 0; i < allQuestions.length; i++) {
                 const mcq = allQuestions[i]
@@ -230,7 +230,7 @@ function OpenModuleComponent(props) {
      * @returns {String} Properly formatted title of page
      */
     const getPageTitle = () => {
-        return toTitleCase(moduleName.replaceAll('_', ' '))
+        return toTitleCase(moduleName.replaceAll('-', ' '))
     }
 
     /**
