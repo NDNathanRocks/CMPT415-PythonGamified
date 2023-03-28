@@ -75,21 +75,7 @@ export default function HomePageComponent() {
     }, [])
 
     const handleModuleStart = (e) => {
-        const module = e.currentTarget.getAttribute('module')
-        let content;
-
-        // ToDo: Load all modules in modules folder
-
-        if (module === 'conditional_statements') {
-            content = conditionalStatementsJson
-        } else {
-            return
-        }
-
-        setOpenedModule({
-            id: module,
-            json: content
-        })
+        setOpenedModule(e.currentTarget.getAttribute('module'))
     }
 
     /**
@@ -158,7 +144,7 @@ export default function HomePageComponent() {
         return (
             <div class="d-flex flex-row justify-content-between">
                 <div className={editorState === 0 ? "flex-grow-1 col-100" : "flex-grow-1 col-7"}>
-                    <OpenModuleComponent file={openedModule} />
+                    <OpenModuleComponent title={openedModule} />
                 </div>
                 {getEditor()}
                 <div className="px-5 mt-5">
