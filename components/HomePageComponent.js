@@ -1,5 +1,3 @@
-import ModulesComponent from "./ModulesComponent";
-import ModulesListComponent from "./ModulesListComponent";
 import BadgesComponent from "./BadgesComponent";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
@@ -10,7 +8,6 @@ import { useContext } from 'react'
 import React, { useState, useEffect } from 'react';
 import Context from '../context/Context'
 import RecentActivityComponent from './RecentActivityComponent'
-import conditionalStatementsJson from '../modules/conditional_statements.json'
 import OpenModuleComponent from './OpenModuleComponent'
 import EditorComponent from './EditorComponent'
 import EasyEditorComponent from './EasyEditorComponent'
@@ -75,21 +72,7 @@ export default function HomePageComponent() {
     }, [])
 
     const handleModuleStart = (e) => {
-        const module = e.currentTarget.getAttribute('module')
-        let content;
-
-        // ToDo: Load all modules in modules folder
-
-        if (module === 'conditional_statements') {
-            content = conditionalStatementsJson
-        } else {
-            return
-        }
-
-        setOpenedModule({
-            id: module,
-            json: content
-        })
+        setOpenedModule(e.currentTarget.getAttribute('module'))
     }
 
     /**
@@ -158,7 +141,7 @@ export default function HomePageComponent() {
         return (
             <div class="d-flex flex-row justify-content-between">
                 <div className={editorState === 0 ? "flex-grow-1 col-100" : "flex-grow-1 col-7"}>
-                    <OpenModuleComponent file={openedModule} />
+                    <OpenModuleComponent title={openedModule} />
                 </div>
                 {getEditor()}
                 <div className="px-5 mt-5">
@@ -192,7 +175,7 @@ export default function HomePageComponent() {
                         </div>
                         <div class="row" >
                             <div class="col-sm-6">
-                                <div href="#" class="card modules_card" module="conditional_statements" onClick={handleModuleStart}>
+                                <div href="#" class="card modules_card" module="conditional-statements" onClick={handleModuleStart}>
                                     <div class="card-body">
                                         <h1 class="d-flex justify-content-center mb-3"><FontAwesomeIcon icon="fa-solid fa-code-branch" /></h1>
                                         <h5 class="card-title">Conditional Statements</h5>
@@ -206,7 +189,7 @@ export default function HomePageComponent() {
                                 </div>
                             </div>
                             <div class="col-sm-6">
-                                <div href="#" class="card modules_card" module="conditional_statements" onClick={handleModuleStart}>
+                                <div href="#" class="card modules_card" module="conditional-statements" onClick={handleModuleStart}>
                                     <div class="card-body">
                                         <h1 class="d-flex justify-content-center mb-3"><FontAwesomeIcon icon="fa-solid fa-rotate-left" /></h1>
                                         <h5 class="card-title">Loops</h5>
