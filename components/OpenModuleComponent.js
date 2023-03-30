@@ -55,7 +55,7 @@ function OpenModuleComponent(props) {
     let questionsForm = null
 
     // Context: user, editor state, challenge data, personalization, toast
-    const { user, page, setPage, setEditorState, setChallengeData, personalization, setPersonalization, setToast } = useContext(Context)
+    const { user, page, setPage, setEditorState, setChallengeData, challengeData, personalization, setPersonalization, setToast } = useContext(Context)
 
     const currentScore = getStudentScore(user)
 
@@ -633,7 +633,7 @@ function OpenModuleComponent(props) {
                 <div class="bg-primary text-dark bg-opacity-25 rounded ps-2 pt-4 me-5 mb-4">
                     <div>
                         <div class="d-flex flex-row justify-content-between rounded sidebar_row px-4 py-2"  id="menu2">
-                            <SideBar sideOut={sideOut}/>
+                            <SideBar sideOut={sideOut} moduleName={moduleName}/>
                         </div>
                     </div>
                 <div id = "quiz_list" class = "quiz_list3">
