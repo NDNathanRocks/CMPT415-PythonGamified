@@ -44,27 +44,12 @@ const quizQuestionConverter = {
 }
 
 /**
- * Returns a QuizQuestion by qid
- * @param {string} qid 
- * @returns {QuizQuestion}
+ * Asynchronous Firebase query for module's questions
+ * @param {String} moduleName 
+ * @returns List of all question objects for that module
  */
-export async function getQuizQuestionById(qid) {
-    const q = query(collection(db, "quiz-questions/conditional-statements/multiple-choice"), where("qid", "==", qid))
-
-    const querySnapshot = await getDocs(q)
-    
-    if (querySnapshot.empty) {
-        return null
-    }
-
-    return quizQuestionConverter.fromFirestore(querySnapshot.docs[0], { idField: "qid" })
-}
-
-/**
- * 
- */
-export async function getAllConditionalStatements() {
-    const q = query(collection(db, "quiz-questions/conditional-statements/multiple-choice"))
+export async function getAllModuleQuestions(moduleName) {
+    const q = query(collection(db, `quiz-questions/${moduleName}/multiple-choice`))
 
     const querySnapshot = await getDocs(q)
     

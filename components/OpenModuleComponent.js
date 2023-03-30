@@ -1,15 +1,13 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { Modal } from "react-bootstrap";
-import { giveStudentScore, getStudentAnswers, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
-import { getQuizQuestionById, getAllConditionalStatements } from '../data/QuizQuestions'
+import { giveStudentScore, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
+import { getAllModuleQuestions } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
-import PersonalizationComponent from './PersonalizationComponent'
 import { useFormik } from 'formik'
 import Context from '../context/Context'
 import SyntaxHighlighter from 'react-syntax-highlighter'
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
-import conditionalStatementsJson from '../modules/conditional_statements.json'
 import { Pages } from '../context/Pages'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { fab } from '@fortawesome/free-brands-svg-icons'
@@ -20,8 +18,6 @@ import SideBar from './SideBarComponent'
 // import { BrowserRouter as Router, Routes, Route} from 'react-router-dom'
 
 function HintModal(props) {
-    const [hint, setHint] = useState('')
-    
     return (
       <Modal
         {...props}
@@ -41,6 +37,27 @@ function HintModal(props) {
     );
   }
 
+function CompletedModal(props) {
+    return (
+      <Modal
+        {...props}
+        size="lg"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title id="contained-modal-title-vcenter">
+            <h2 class="mt-3">🎉 Congratulations! 🎉</h2>
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h5>You have completed all questions in the <b>{props.title}</b> module!</h5>
+          <p>You may redo this quiz any time for review.</p>
+        </Modal.Body>
+      </Modal>
+    );
+}
+
 /**
  * Component for a module's contents and multiple choice questions.
  * @param {*} props 
@@ -48,11 +65,8 @@ function HintModal(props) {
  */
 function OpenModuleComponent(props) {
     library.add(fab, fas, far)
-    const moduleJson = props.file.json
 
-    const moduleName = props.file.id
-
-    let questionsForm = null
+    const moduleName = props.title
 
     // Context: user, editor state, challenge data, personalization, toast
     const { user, page, setPage, setEditorState, setChallengeData, challengeData, personalization, setPersonalization, setToast } = useContext(Context)
@@ -61,21 +75,6 @@ function OpenModuleComponent(props) {
 
     // State for the module's contents
     const [elements, setElements] = useState([])
-
-    // State for the current page of the module
-    const [currentPage, setCurrentPage] = useState(0)
-
-    // State for the current Menu of the module
-    const [currentMenu, setCurrentMenu] = useState(0)
-
-    // State for pagination HTML
-    const [pagination, setPagination] = useState([])
-
-    // State for estimated lesson time
-    const [lessonTime, setLessonTime] = useState('')
-
-    // State for lecture visibility
-    const [showLecture, setShowLecture] = useState(false)
 
     // State for multiple choice questions
     const [questions, setQuestions] = useState([])
@@ -98,7 +97,11 @@ function OpenModuleComponent(props) {
     // State for the current hint for the multiple choice question
     const [hint, setHint] = useState('')
 
-    const [modalShow, setModalShow] = useState(false);
+    // State for the the visibility of the hint modal
+    const [hintModalShow, setHintModalShow] = useState(false);
+
+    // State for the the visibility of the completed modal
+    const [completedModalShow, setCompletedModalShow] = useState(false);
 
     // State for showing next question button
     const [showNextBtn, setShowNextBtn] = useState(false)
@@ -111,6 +114,7 @@ function OpenModuleComponent(props) {
         getPersonalization(user.uuid).then(p => {
             setPersonalization(p)
         })
+        handleModuleStart()
         getQuestions()
     }, [])
 
@@ -119,27 +123,8 @@ function OpenModuleComponent(props) {
         createForm()
     }, [questions])
 
-    // Load module contents
-    useEffect(() => {
-        handleModuleStart()
-        calculateLessonTime()
-        handlePagination()
-    }, [currentPage])
 
     useEffect(() => {
-        handleModuleStart()
-        calculateLessonTime()
-        handlePagination()
-    }, [currentMenu])
-
-    useEffect(() => {
-        handleModuleStart()
-        calculateLessonTime()
-        handlePagination()
-    }, [showLecture])
-
-    useEffect(() => {
-        retrieveStudentAnswers()
         createForm()
     }, [currentQuestion])
 
@@ -154,7 +139,6 @@ function OpenModuleComponent(props) {
         onSubmit: values => {
             const pick = values.picked
             const checked = solvedQuestionCheck(user, moduleName, currentQuestion)
-            show_related()
 
             var setDisable = false;
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
@@ -182,6 +166,7 @@ function OpenModuleComponent(props) {
                 // If last question is right, disable form from submitting (student has finished the quiz)
                 if (currentQuestion >= (questions.length - 1)) {
                     setDisable = true;
+                    setCompletedModalShow(true)
                 }
             } else if (pick !== ''){
                 if (values.options.length > 2) {
@@ -198,10 +183,12 @@ function OpenModuleComponent(props) {
         },
     })
 
+    /**
+     * Fill in form with information of current question as pulled from Firebase
+     */
     const createForm = () => {
         if (questions.length > 0 && currentQuestion < questions.length) {
             var formQuestion = document.getElementById("quiz_question");
-            var formCode = document.getElementById("quiz_code");
             
             const quizQuestion = questions[currentQuestion].question;
             const quizCode = questions[currentQuestion].code;
@@ -225,8 +212,11 @@ function OpenModuleComponent(props) {
         }
     }
 
+    /**
+     * Asynchronously pull questions from firebase and load them
+     */
     const getQuestions = () => {
-        getAllConditionalStatements().then(allQuestions => {
+        getAllModuleQuestions(moduleName).then(allQuestions => {
             let tempQuestions = []
             for (let i = 0; i < allQuestions.length; i++) {
                 const mcq = allQuestions[i]
@@ -247,120 +237,26 @@ function OpenModuleComponent(props) {
         })
     }
 
+    /**
+     * 
+     * @param {String} str 
+     * @returns String converted into title case
+     */
+    function toTitleCase(str) {
+        return str.replace(
+          /\w\S*/g,
+          function(txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+          }
+        );
+      }
+
 
     /**
-     * Returns the current page's module contents.
-     * @returns HTML for the module's contents.
+     * @returns {String} Properly formatted title of page
      */
-    const getCurrentPageBody = () => {
-        const currentPageBody = moduleJson.body.find(body => body.page === currentPage)
-
-        if (currentPageBody) {
-            return currentPageBody.content
-        }
-
-        return []
-    }
-
-    /**
-     * Returns the current page's multiple choice questions
-     * @returns Multiple choice questions HTML
-     */
-    const getCurrentPageMcqs = () => {
-        const currentPageObject = moduleJson.body.find(body => body.page === currentPage)
-
-        if (currentPageObject) {
-            return currentPageObject.mcqs
-        }
-
-        return []
-    }
-
-    /**
-     * @param {Number} page 
-     * @returns {String} title of page
-     */
-    const getPageTitle = (page) => {
-        const pageTitle = moduleJson.body.find(body => body.page === page)
-
-        if (pageTitle) {
-            return pageTitle.name
-        }
-
-        return '...'
-    }
-
-        /**
-     * Handles a page change.
-     * @param {Number} page 
-     */
-         const menu_select = (page) => {
-            var menu1 = document.getElementById("menu1")
-            var menu2 = document.getElementById("menu2")
-            var menu3 = document.getElementById("menu3")
-            var menu = [menu1, menu2, menu3]
-            menu[page].classList = "active"
-            for (let i = 0; i < menu.length; i++) {
-                if (i != page) {
-                    if (menu[i].classList == "active") {
-                        menu[i].classList.toggle("active")
-                    }
-                }
-            }
-            if(page == 0) {
-                document.getElementById("quiz_list").style.visibility = "hidden";
-            }
-            if(page == 2) {
-                document.getElementById("quiz_list").style.visibility = "hidden";
-            }
-            if (page == 1) {
-                document.getElementById("quiz_list").style.visibility = "visible";
-            }
-        }
-
-        
-
-    /**
-     * Handles a page change.
-     * @param {Number} page 
-     */
-    const handlePageChange = (page, resetForm) => {
-        // document.getElementById("quiz_list").style.visibility = "visible";
-        // window.location.reload()
-        {hide_hint2}
-        // document.getElementById("radio-check").checked = false
-        // const radioButtons = document.querySelectorAll('input[id="radio-check"]')
-        // radioButtons.checked = false
-        refreshFormik()
-        resetForm()
-        // let radios = document.getElementsByTagName('radio-check');
-        // console.log(radios.length)
-        // for(let i = 0; i < radios.length; i++) {
-        //     // radios[i].onclick = function(e) {
-        //     if(e.ctrlKey) {
-        //         this.checked = false;
-        //     }
-        // // }
-        // }
-        // if selected page is quiz, then keep it into quiz
-        if (page == 0 || page == 1 || page == 2) {
-            menu_select(1)
-        }
-        console.log(page)
-        // menu_select(page+2)
-        if (page < 0) {
-            page = 0
-        }
-
-        if (page >= moduleJson.body.length) {
-            page = moduleJson.body.length - 1
-        }
-
-        setShowLecture(false)
-        setWrongQuestions(0)
-        setCurrentQuestion(0)
-        setCurrentPage(page)
-        setCurrentMenu(page)
+    const getPageTitle = () => {
+        return toTitleCase(moduleName.replaceAll('-', ' '))
     }
 
     /**
@@ -374,93 +270,13 @@ function OpenModuleComponent(props) {
         }
         document.getElementsByClassName("form-check-input").checked = false;
         formik.setFieldValue('picked', '')
-        // if (matchId) { // If record exists
-        //     await resetForm({ values }); // sets dirty false
-        // } else { // otherwise
-        //     const newValues = { ...values, matchId: results.data.matchId }; // augment with db id
-        //     await resetForm({ values: newValues }); // sets dirty false
-        // }
         setCurrentExplanation('')
-    }
-
-    /**
-     * Handles the pagination.
-     */
-    const handlePagination = () => {
-        const pageList = []
-        if (currentPage !== 0) {
-            pageList.push(
-                <a class="prev" href="#" tabindex="-1" id = "prev01" onClick={() => handlePageChange(currentPage - 1, formik.resetForm)}>Prev</a>
-            )
-        }
-        else {
-            pageList.push(
-                <a class="prev_disabled" href="#" id = "prev02" tabindex="-1" onClick={() => handlePageChange(currentPage - 1, formik.resetForm)}>Prev</a>
-            )
-        }
-        pageList.push(<a class = "bottom_page" id = "page_number" disabled=""> Page {currentPage + 1}/{moduleJson.body.length} </a>)
-
-        if (currentPage !== moduleJson.body.length - 1) {
-            pageList.push(
-                <a class="next" id = "next01" href="#" onClick={() => handlePageChange(currentPage + 1, formik.resetForm)}>Next</a>
-            )
-        }
-        else {
-            pageList.push(
-                <a class="next_disabled" id = "next02" href="#" onClick={() => handlePageChange(currentPage + 1,formik.resetForm)}>Next</a>
-            )
-        }
-        setPagination(pageList)
     }
 
     /**
      * Handles a module being started.
      */
     const handleModuleStart = () => {
-        // Parse the module's body
-        const moduleBody = getCurrentPageBody()
-        let divs = []
-        let incompleteChallenges = []
-
-        if (personalization === null) {
-            getPersonalization(user.uuid).then(p => {
-                setPersonalization(p)
-            })
-        }
-
-        // get all id's from personalization
-        // const personalizationIds = personalization.challenges || []
-        // #############################################################
-        const personalizationIds = []
-        // #############################################################
-
-        // loop through each element in the module body
-        for (let i = 0; i < moduleBody.length; i++) {
-            const getChallenge = loadAllChallenges(moduleBody, i)
-
-            if (getChallenge !== null) {
-                if (!personalizationIds.includes(getChallenge.id)) {
-                    incompleteChallenges.push(getChallenge)
-                }
-            }
-        }
-
-        const mcqs = getCurrentPageMcqs()
-        const tempQuestions = []
-
-        for (let i = 0; i < mcqs.length; i++) {
-            const mcq = mcqs[i]
-            const question = {
-                id: mcq.id,
-                question: mcq.question,
-                answers: mcq.answers,
-                correctAnswerIndex: mcq.correctAnswerIndex,
-                explanation: mcq.explanation,
-            }
-
-            // tempQuestions.push(question)
-        }
-
         let divs2 = null
         divs2 = (
             <div id="mc-question-box2">
@@ -471,17 +287,7 @@ function OpenModuleComponent(props) {
                 </div> */}
             </div>
         )
-        // setQuestions(tempQuestions)
         setElements(divs2)
-
-        const randomChallenge = incompleteChallenges[Math.floor(Math.random() * incompleteChallenges.length)]
-
-        setChallengeData({
-            id: randomChallenge.id,
-            code: randomChallenge.code,
-            question: randomChallenge.value
-        })
-
     }
 
     /**
@@ -508,67 +314,6 @@ function OpenModuleComponent(props) {
     }
 
     /**
-     * Estimates the time it takes to read the lecture notes.
-     */
-    const calculateLessonTime = () => {
-        let text = ''
-
-        for (let i = 0; i < elements.length; i++) {
-            text += elements[i].innerText
-        }
-
-        text = text.replace(/<[^>]+>/g, '')
-
-        // Average adult is 225wpm; since this is coding, we will go
-        // with a lower wpm
-        const wpm = 185
-        const words = text.trim().split(/\s+/).length
-        const time = Math.ceil(words / wpm)
-        setLessonTime(time + " minute(s)")
-    }
-    
-    /**
-     * Returns all challenges in the module.
-     * @param {[String]} moduleBody 
-     * @param {Number} index 
-     * @returns Challenges object
-     */
-    const loadAllChallenges = (moduleBody, index) => {
-        const element = moduleBody[index]
-
-        if (element['type'] === 'challenge') {
-            const c = {
-                id: element['id'],
-                value: element['value'],
-                code: element['code'],
-            }
-
-            return c
-        }
-
-        return null
-    }
-
-
-    /**
-     * Retrieves student answers (INCOMPLETE)
-     */
-    const retrieveStudentAnswers = () => {
-        const q = questions[currentQuestion]
-
-        if (!q) {
-            return
-        }
-
-        getStudentAnswers(user, q.id).then(answers => {
-            // console.log(answers)
-            // ToDo: Load saved answers into Formik
-            //formik.picked = answers.answers[0] | ''
-            //formik.isSubmitting = true
-        })
-    }
-
-    /**
      * Goes to the next multiple choice question.
      */
     const nextQuestion = () => {
@@ -586,20 +331,9 @@ function OpenModuleComponent(props) {
     }
 
 
-          /**
-     * Sends an email to the user with a link to reset their password
-     * @param {Event} e 
-     */
-           const hide_hint2 = (e) => {
-            document.getElementById("mc-question-box3").style.display = "block";
-            document.getElementById("mc-question-box2").style.display = "none";
-        }
-    
-
-    const show_related = () => {
-        
-    }
-
+    /*
+    * Get and display users current amount of coins
+    */
     function show_point() {
         currentScore.then((value) => {
             document.getElementById('p').innerHTML =  'Current Coins: ' + value + ' </p>';
@@ -607,6 +341,9 @@ function OpenModuleComponent(props) {
     }
    
 
+    /*
+    * Display hint when useer clicks. If they have not bought the hint before, reduce their score accordingly
+    */
     const displayHint = () => {
         const hintChecked = questionHintCheck(user, moduleName, currentQuestion)
         hintChecked.then(value => {
@@ -616,7 +353,7 @@ function OpenModuleComponent(props) {
             }
         })
         questionHintUpdate(user, moduleName, currentQuestion, true)
-        setModalShow(true)
+        setHintModalShow(true)
     }
 
     const sideOut = (theStr) => {
@@ -644,12 +381,11 @@ function OpenModuleComponent(props) {
                 <div className = "quiz_box">
                     <br></br>
                     <div className = "quiz_inner_box">
-                        <h1>{getPageTitle(currentPage)}</h1>
-                        <h5>Question {currentQuestion + 1}/{questions.length} &middot; Estimated time to complete lesson: {lessonTime}</h5>
+                        <h1>{getPageTitle()}</h1>
+                        <h5>Question {currentQuestion + 1}/{questions.length}</h5>
                         {elements}
                         <div id ="quiz_form">
                         <div id="mc-question-box">
-                        <h3>Multiple-Choice Question</h3>
                         <div class = "code-toolbox">
                         <form onSubmit={formik.handleSubmit}>
                             <p id="quiz_question">Question</p>
@@ -686,8 +422,11 @@ function OpenModuleComponent(props) {
                                 </div>
                                 <div className="col">
                                     <div onload = {show_point()}>
-                                        <div id = "p" className = "point"></div>
-                                        <div className = "pointdescription">10 Coins are need to use a hint.</div>
+                                        <div class="d-flex justify-content-start">
+                                            <div id = "p" className = "point me-2"></div>
+                                            <FontAwesomeIcon icon="fa-solid fa-coins" />
+                                        </div>
+                                        <div className = "pointdescription">10 <FontAwesomeIcon icon="fa-solid fa-coins" /> are need to use a hint.</div>
                                     </div>
                                     <button className="btn btn-warning mt-3" type="button" onClick={displayHint}>Hint</button>
                                 </div>
@@ -704,10 +443,15 @@ function OpenModuleComponent(props) {
                 </div>
             </div>
             <HintModal
-                show={modalShow}
+                show={hintModalShow}
                 title={currentQuestion + 1}
                 body={hint}
-                onHide={() => setModalShow(false)}
+                onHide={() => setHintModalShow(false)}
+            />
+            <CompletedModal
+                show={completedModalShow}
+                title={getPageTitle()}
+                onHide={() => setCompletedModalShow(false)}
             />
         </div>
     )
