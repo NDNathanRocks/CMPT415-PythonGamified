@@ -17,8 +17,9 @@ export default function SideBar(props) {
     library.add(fab, fas, far)
 
     const { challengeNumber, setChallengeNumber, challengeQuestion } = useContext(Context)
+    const moduleName = props.moduleName
 
-    const questionTopicsList = challengeQuestion.map((question, i) => (
+    const questionTopicsList = challengeQuestion[moduleName].question_data.map((question, i) => (
         <NavItem eventKey={i}>
             <NavText>{question.title}</NavText>
         </NavItem> 

@@ -20,6 +20,26 @@ export async function getQuestionsList() {
 };
 
 /**
+ * Get Data from Student
+ */
+export async function getQuestionData(student) {
+  const ref = collection(db, "students")
+  const q = query(ref, where("email", "==", student.email))
+  const querySnapshot = await getDocs(q)
+
+  if (querySnapshot.empty) {
+      return []
+  }
+
+  const studentDoc = querySnapshot.docs[0]
+  const studentData = studentDoc.data()
+  const currentQuestion = studentData.challenge_questions
+  
+  const theData = currentQuestion.modules
+  return theData
+};
+
+/**
  * Updates Scores
  */
 export async function updateScore(student, score) {
@@ -57,6 +77,29 @@ export async function solvedQuestionUpdate(student, title, questionNumber) {
   if (!currentQuestion.modules[title].solved_questions.includes(questionNumber)) {
     currentQuestion.modules[title].solved_questions.push(questionNumber)
   }
+
+  // Update firebase with changes
+  await updateDoc(studentDoc.ref, { challenge_questions: currentQuestion })
+  return true
+};
+
+/**
+ * Run when student runs their code
+ */
+export async function updateQuestionData(student, title, theData) {
+  const ref = collection(db, "students")
+  const q = query(ref, where("email", "==", student.email))
+  const querySnapshot = await getDocs(q)
+
+  if (querySnapshot.empty) {
+      return false
+  }
+
+  const studentDoc = querySnapshot.docs[0]
+  const studentData = studentDoc.data()
+  const currentQuestion = studentData.challenge_questions
+  
+  currentQuestion.modules[title].question_data = theData
 
   // Update firebase with changes
   await updateDoc(studentDoc.ref, { challenge_questions: currentQuestion })
