@@ -24,7 +24,7 @@ export default function SideBar(props) {
             <NavText>{question.title}</NavText>
         </NavItem> 
     ))
-
+    
     return ( 
     
         <SideNav 
@@ -47,7 +47,8 @@ export default function SideBar(props) {
                 <NavItem eventKey="comp">
                     <NavIcon><FontAwesomeIcon icon="fa-solid fa-brain" /></NavIcon>
                     <NavText>Challenge</NavText>
-                    {questionTopicsList}
+                    {challengeQuestion[moduleName] && questionTopicsList}
+                    {/* {challengeQuestion[moduleName] ? questionTopicsList: null} */}
                 </NavItem>
             </SideNav.Nav>
 
