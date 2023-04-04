@@ -198,12 +198,13 @@ function OpenModuleComponent(props) {
             setCode(quizCode.replaceAll('\\n', '\n'));
 
             for (let i = 0; i < 6; i++) {
+                var currentLabel = document.getElementById(`label-${i}`);
                 if (i < quizAnswerOptions.length) {
-                    var currentLabel = document.getElementById(`label-${i}`);
                     currentLabel.innerHTML = ` ${quizAnswerOptions[i]}`
                 } else {
                     var currentRadio = document.getElementById(`radio-check-${i}`);
-                    currentRadio.style.display = "none";
+                    currentRadio.style.visibility = "hidden";
+                    currentLabel.innerHTML = ``
                 }
             }
 
@@ -267,6 +268,7 @@ function OpenModuleComponent(props) {
         for (let i = 0; i < 6; i++) {
             var currentRadio = document.getElementById(`radio-check-${i}`);
             currentRadio.checked = false;
+            currentRadio.style.visibility = "visible";
         }
         document.getElementsByClassName("form-check-input").checked = false;
         formik.setFieldValue('picked', '')
