@@ -21,6 +21,9 @@ export default function EditorComponent(props) {
     }
     
     const { challengeNumber, setChallengeNumber, challengeQuestion, user, openedModule, setToast } = useContext(Context)
+    
+    const moduleName = openedModule.replaceAll('-', '_')
+    console.log(moduleName);
 
     // State for the code's output
     const [output, setOutput] = useState(["# Your output will be displayed here\n"])
@@ -123,15 +126,15 @@ export default function EditorComponent(props) {
                     const s = b.toString('ascii')
                     setOutput([...output, s])
                     afterRun(s)
-                    challengeQuestion[openedModule.id].question_data[challengeNumber].output = s
+                    challengeQuestion[moduleName].question_data[challengeNumber].output = s
                 } else {
                     const s = ""
                     setOutput([...output, s])
                     afterRun(s)
-                    challengeQuestion[openedModule.id].question_data[challengeNumber].output = s
+                    challengeQuestion[moduleName].question_data[challengeNumber].output = s
                 }
-                challengeQuestion[openedModule.id].question_data[challengeNumber].mycode = editorVal
-                updateQuestionData(user, openedModule.id, challengeQuestion[openedModule.id].question_data)
+                challengeQuestion[moduleName].question_data[challengeNumber].mycode = editorVal
+                updateQuestionData(user, moduleName, challengeQuestion[moduleName].question_data)
                 setRunEnabled(true)
               }).catch(function (error) {
                 alert("Error: " + error)
@@ -146,9 +149,9 @@ export default function EditorComponent(props) {
     }
 
     const afterRun = async (s) => {
-        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === challengeQuestion[openedModule.id].question_data[challengeNumber].answer) {
-            if (challengeQuestion[openedModule.id].question_data[challengeNumber].completed == false) {
-                if (await solvedQuestionUpdate(user, openedModule.id, challengeNumber)) {
+        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === challengeQuestion[moduleName].question_data[challengeNumber].answer) {
+            if (challengeQuestion[moduleName].question_data[challengeNumber].completed == false) {
+                if (await solvedQuestionUpdate(user, moduleName, challengeNumber)) {
                     //increase score
                     updateScore(user, 50)
                     setToast({
@@ -160,7 +163,7 @@ export default function EditorComponent(props) {
                         // message: "⭐ +50 score"
                     })
                     // setModalNextQuestionShow(true)
-                    challengeQuestion[openedModule.id].question_data[challengeNumber].completed = true
+                    challengeQuestion[moduleName].question_data[challengeNumber].completed = true
                 } else {
                     setToast({
                         title: "Good for trying again!",
@@ -182,15 +185,15 @@ export default function EditorComponent(props) {
     }
 
     useEffect(() => {
-        setOutput([challengeQuestion[openedModule.id].question_data[challengeNumber].output])
-        setEditorVal(challengeQuestion[openedModule.id].question_data[challengeNumber].mycode)
+        setOutput([challengeQuestion[moduleName].question_data[challengeNumber].output])
+        setEditorVal(challengeQuestion[moduleName].question_data[challengeNumber].mycode)
     }, [challengeNumber])
 
     /**
     * Modal Stuff
     **/
     function handleOpen(){
-        checkHintUsedAndUpdate(user, openedModule.id, challengeNumber)
+        checkHintUsedAndUpdate(user, moduleName, challengeNumber)
         setModalHintShow(true)
     }
 
@@ -269,7 +272,7 @@ export default function EditorComponent(props) {
             </div>
         )
     }
-    const [editorVal, setEditorVal] = useState(challengeQuestion[openedModule.id].question_data[challengeNumber].mycode)
+    const [editorVal, setEditorVal] = useState(challengeQuestion[moduleName].question_data[challengeNumber].mycode)
     function handleEditorChange(value, event) {
         setEditorVal(value)
       }
@@ -281,15 +284,15 @@ export default function EditorComponent(props) {
 
             <div className="editor-output">
                 <div className="output">
-                    <h5>Question {challengeNumber+1} - {challengeQuestion[openedModule.id].question_data[challengeNumber].title}</h5>
+                    <h5>Question {challengeNumber+1} - {challengeQuestion[moduleName].question_data[challengeNumber].title}</h5>
                     <ul>
-                        {challengeQuestion[openedModule.id].question_data[challengeNumber].question}
+                        {challengeQuestion[moduleName].question_data[challengeNumber].question}
                     </ul>
                     <Editor
                         height="40vh"
                         defaultLanguage="python"
-                        value={ challengeQuestion[openedModule.id].question_data[challengeNumber].mycode.replaceAll("\\n",'\n') }
-                        // defaultValue = {challengeQuestion[openedModule.id].question_data[challengeNumber].mycode}
+                        value={ challengeQuestion[moduleName].question_data[challengeNumber].mycode.replaceAll("\\n",'\n') }
+                        // defaultValue = {challengeQuestion[moduleName].question_data[challengeNumber].mycode}
                         options={options}
                         onMount={handleEditorDidMount}
                         onChange={handleEditorChange}
@@ -307,14 +310,14 @@ export default function EditorComponent(props) {
                         output.at(-1)
                         }
                     </ul>
-                    <CheckOutputComponent output={output} moduleName={openedModule.id}/>
+                    <CheckOutputComponent output={output} moduleName={moduleName}/>
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>
                     <HintModal
                         show={modalHintShow}
                         title={challengeNumber + 1}
-                        body={challengeQuestion[openedModule.id].question_data[challengeNumber].hint}
+                        body={challengeQuestion[moduleName].question_data[challengeNumber].hint}
                         onHide={() => setModalHintShow(false)}
                     />
                     <button type="button" className="btn btn-light" href="#" role="button" onClick={handleOpen}>Hint</button>
