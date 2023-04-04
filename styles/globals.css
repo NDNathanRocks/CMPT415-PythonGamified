@@ -1,15 +1,22 @@
 @import url('../node_modules/font-awesome/css/font-awesome.min.css');
 
-/* .table {
-  margin-right: 0.1rem;
-  display: grid;
-  font-size: 14px;
-  grid-template-columns: 0.4fr 3fr 1fr 1fr 1fr 1fr 1fr 1fr;
+.header-block {
   text-align: center;
-} */
+  padding-top: 40px;
+  width: 100%;
+  height: 120px;
+}
+
+.leaderboard-block {
+  margin: auto;
+  display: flex;
+  height: 200px;
+  width: 80%;
+  align-self: center;
+}
 
 .item-wrapper {
-  border: 1px solid salmon;
+  border: 1px solid rgb(114, 162, 250);
   width: 200px;
   padding: 0;
   margin-left: 0;
@@ -17,23 +24,26 @@
 
 .item {
   display: grid;
-  grid-template-columns: 0.4fr 3fr 1fr 1fr 1fr;
+  grid-template-columns: 0.4fr 2fr 1fr 1fr 1.5fr 1.25fr;
   padding: 10px;
   will-change: transform;
   transition: all 0.3s ease-in;
 }
 
-.item__score {
-  font-family: monospace;
+.item__rank {
+  margin-left: 20px;
+  text-align: left;
 }
 
 .item__name,
 .item__score,
-.item__rank,
+.item_header_rank,
 .item__mcqsolved,
-.item__challsolved  {
+.item__challsolved,
+.item__badges  {
   margin-left: 10px;
   text-align: left;
+  font-family: monospace;
 }
 
 .nav_blue_background {

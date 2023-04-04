@@ -30,6 +30,8 @@ export async function getLeaderboardData() {
         theData[i] = studentDocs[i].data()
     }
 
+    theData.sort((a,b) => b.score - a.score)
+
     return theData
 };
 
