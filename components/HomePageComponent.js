@@ -6,7 +6,7 @@ import { far } from '@fortawesome/free-regular-svg-icons'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { useContext } from 'react'
 import React, { useState, useEffect } from 'react';
-import { getStudentScore } from '../data/Students'
+import { getStudentScore, giveStudentScore, setDateLastVisited, setAttendanceStreak, getDateLastVisited, getAttendanceStreak } from '../data/Students'
 import Context from '../context/Context'
 import RecentActivityComponent from './RecentActivityComponent'
 import OpenModuleComponent from './OpenModuleComponent'
@@ -22,7 +22,7 @@ import { getQuestionsList, updateScore, solvedQuestionUpdate, checkHintUsedAndUp
 
 export default function HomePageComponent() {
     library.add(fab, fas, far)
-    const { openedModule, setOpenedModule, editorState, setChallengeQuestion, challengeQuestion, user } = useContext(Context)
+    const { openedModule, setOpenedModule, editorState, setChallengeQuestion, challengeQuestion, user, setToast } = useContext(Context)
     const chalQuestionsRef = collection(db, "quiz-questions/conditional-statements/challenge")
 
     const currentScore = getStudentScore(user)
@@ -91,6 +91,7 @@ export default function HomePageComponent() {
         theQuestions.then(value => {
             setChallengeQuestion(value)
         })
+        updateAttendance()
     }, [])
 
     /*
@@ -100,6 +101,72 @@ export default function HomePageComponent() {
         currentScore.then((value) => {
             document.getElementById('p').innerHTML = value + ' </p>';
         });
+    }
+
+    const updateAttendance = (e) => {
+        // Find and set up today's date
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0
+        var yyyy = today.getFullYear();
+        today.setHours(0,0,0,0); // Needed to compare only dates (and not times)
+
+        var todayStr = yyyy + '-' + mm + '-' + dd;
+
+        var lastVisited = getDateLastVisited(user)
+        lastVisited.then(value => { 
+            var caughtLastVisited = value + '' // Needed to make into string
+            var dateParts = caughtLastVisited.split('-');
+            var lastVisitedDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+
+            // Find and set up yesterday's date
+            var yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            yesterday.setHours(0,0,0,0);
+
+            var points = 5;
+
+            var attendanceStreak = getAttendanceStreak(user)
+            attendanceStreak.then(val => { 
+                // If revisting on the same day do not update the user's points
+                if (today.getTime() === lastVisitedDate.getTime()) {
+                    points = 0
+                // If user visited yesterday, then they are continuing their streak
+                } else if (yesterday.getTime() === lastVisitedDate.getTime()) {
+                    setDateLastVisited(user, todayStr)
+                    setAttendanceStreak(user, val + 1)
+                    
+                    // Change points given depending on length of streak
+                    if (val === 1) {
+                        points += 0;
+                    } else if (val === 2) {
+                        points += 5;
+                    } else if (val === 3) {
+                        points += 10;
+                    } else if (val === 4) {
+                        points += 25;
+                    } else {
+                        points += 45;
+                    }
+                    giveStudentScore(user, points)
+                // Otherwise, user is starting new streak
+                } else {
+                    setDateLastVisited(user, todayStr)
+                    setAttendanceStreak(user, 1)
+                    giveStudentScore(user, points)
+                }
+    
+                // If user gained points, display it
+                if (points !== 0) {
+                    setToast({
+                        title: "Welcome back!",
+                        message: `You earned ${points} coins for visiting today :)`
+                    })
+                }
+            
+            })
+
+        })
     }
 
     const handleModuleStart = (e) => {
