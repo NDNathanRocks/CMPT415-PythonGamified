@@ -4,43 +4,44 @@ import List from "./List";
 
 export default function LeaderboardPageComponent() {
 
-    const [ data, setData ] = useState(
-        [{
-            name : "default1",
-            score : 44
-        }, {
-            name : "default2",
-            score : 1234
-        }]
-    )
+    const [ data, setData ] = useState([])
+    //     [{
+    //         name : "default1",
+    //         score : 4444
+    //     }, {
+    //         name : "default2",
+    //         score : 1234
+    //     }]
+    // )
 
     useEffect(() => {
         console.log("Leaderboard Page Mounted!\nReading Firebase Data!");
-        setData(data.sort((a,b) => b.score - a.score))
-        // const theData = getLeaderboardData()
-        // theData.then(value => {
-        //     setData(value)
-        // })
+        const theData = getLeaderboardData()
+        theData.then(value => {
+            setData(value)
+        })
     }, [])
 
-    console.log(data);
     const labels = [{
         rank : "Rank",
         name : "Name", 
         score : "Score",
         mcqsolved : "MCQ's Solved",
-        challsolved : "Challenge Questions Solved"
+        challsolved : "Challenge Questions Solved",
+        badges : "Badges"
     }]
 
     return (
-        <div class="d-flex flex-row justify-content-between">
-            <div className="flex-grow-1">
-                <div className="row mb-3">
-                    <div className="col d-flex justify-content-center">
-                        <h2>Leaderboard</h2>
+        <div>
+            <div className='header-block'>
+                <h2>Leaderboard</h2>
+            </div>
+            <div className="leaderboard-block">
+                <div className="flex-grow-1">
+                    <div className="row mb-3">
+                        <List data={labels} isHeader={true}/>
+                        <List data={data} isHeader={false}/>
                     </div>
-                    <List data={labels}/>
-                    <List data={data} />
                 </div>
             </div>
         </div>
