@@ -256,7 +256,7 @@ export async function giveStudentScore(student, score) {
 
     // If question number is outside of array size, append array
     if (currentQuestion[title].length <= questionNumber) {
-        currentQuestion[title].append(updateVal)
+        currentQuestion[title].push(updateVal)
     } else {
         // Update whether question has been solved or not
         currentQuestion[title][questionNumber] = updateVal
@@ -331,7 +331,7 @@ export async function questionHintUpdate(student, title, questionNumber, newVal)
 
     // If question number is outside of array size, append array
     if (currentQuestion[title].length <= questionNumber) {
-        currentQuestion[title].append(updateVal)
+        currentQuestion[title].push(updateVal)
     } else {
         // Update whether hint is bought or not
         currentQuestion[title][questionNumber] = updateVal
