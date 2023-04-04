@@ -189,21 +189,31 @@ function OpenModuleComponent(props) {
     const createForm = () => {
         if (questions.length > 0 && currentQuestion < questions.length) {
             var formQuestion = document.getElementById("quiz_question");
+            var codeBox = document.getElementById("quiz_code");
             
-            const quizQuestion = questions[currentQuestion].question;
+            const quizQuestion = questions[currentQuestion].question.replaceAll('\\n', '\n');
             const quizCode = questions[currentQuestion].code;
             const quizAnswerOptions = questions[currentQuestion].answers;
             formQuestion.innerHTML = `${quizQuestion}`;
-            
+
             setCode(quizCode.replaceAll('\\n', '\n'));
+            
+            // If there is no code, hide the code box
+            if (!quizCode) {
+                codeBox.style.visibility = "hidden";
+            // If there is code, make sure it is displayed
+            } else {
+                codeBox.style.visibility = "visible";
+            }
 
             for (let i = 0; i < 6; i++) {
+                var currentLabel = document.getElementById(`label-${i}`);
                 if (i < quizAnswerOptions.length) {
-                    var currentLabel = document.getElementById(`label-${i}`);
                     currentLabel.innerHTML = ` ${quizAnswerOptions[i]}`
                 } else {
                     var currentRadio = document.getElementById(`radio-check-${i}`);
-                    currentRadio.style.display = "none";
+                    currentRadio.style.visibility = "hidden";
+                    currentLabel.innerHTML = ``
                 }
             }
 
@@ -267,6 +277,7 @@ function OpenModuleComponent(props) {
         for (let i = 0; i < 6; i++) {
             var currentRadio = document.getElementById(`radio-check-${i}`);
             currentRadio.checked = false;
+            currentRadio.style.visibility = "visible";
         }
         document.getElementsByClassName("form-check-input").checked = false;
         formik.setFieldValue('picked', '')
