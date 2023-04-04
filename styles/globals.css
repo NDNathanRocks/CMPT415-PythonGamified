@@ -1,5 +1,41 @@
 @import url('../node_modules/font-awesome/css/font-awesome.min.css');
 
+/* .table {
+  margin-right: 0.1rem;
+  display: grid;
+  font-size: 14px;
+  grid-template-columns: 0.4fr 3fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  text-align: center;
+} */
+
+.item-wrapper {
+  border: 1px solid salmon;
+  width: 200px;
+  padding: 0;
+  margin-left: 0;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 0.4fr 3fr 1fr 1fr 1fr;
+  padding: 10px;
+  will-change: transform;
+  transition: all 0.3s ease-in;
+}
+
+.item__score {
+  font-family: monospace;
+}
+
+.item__name,
+.item__score,
+.item__rank,
+.item__mcqsolved,
+.item__challsolved  {
+  margin-left: 10px;
+  text-align: left;
+}
+
 .nav_blue_background {
   background-color: #89ABE3FF;
 }

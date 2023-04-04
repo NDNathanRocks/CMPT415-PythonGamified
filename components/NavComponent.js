@@ -54,6 +54,16 @@ export default function NavComponent(props) {
     }
 
     /**
+     * Handles the leaderboard being opened.
+     * @param {*} e 
+     */
+    const handleLeaderboardClick = (e) => {
+        e.preventDefault()
+        setOpenedModule(null)
+        setPage(Pages.LEADERBOARD)
+    }
+
+    /**
      * Handles the editor board being opened.
      * @param {*} e 
      */
@@ -108,6 +118,9 @@ export default function NavComponent(props) {
                     </li>
                     <li className="nav-item">
                         <a className={"nav-link" + checkIfActive(Pages.PROFILE)} aria-current="page" href="#" onClick={handleProfileClick}>My Profile</a>
+                    </li>
+                    <li className="nav-item">
+                        <a className={"nav-link" + checkIfActive(Pages.PROFILE)} aria-current="page" href="#" onClick={handleLeaderboardClick}>Leaderboard</a>
                     </li>
                 </ul>
                 <span className="navbar-text">
