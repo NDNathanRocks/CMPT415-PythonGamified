@@ -189,11 +189,24 @@ function OpenModuleComponent(props) {
     const createForm = () => {
         if (questions.length > 0 && currentQuestion < questions.length) {
             var formQuestion = document.getElementById("quiz_question");
+            var codeBox = document.getElementById("quiz_code");
             
             const quizQuestion = questions[currentQuestion].question;
             const quizCode = questions[currentQuestion].code;
             const quizAnswerOptions = questions[currentQuestion].answers;
             formQuestion.innerHTML = `${quizQuestion}`;
+
+            setCode(quizCode.replaceAll('\\n', '\n'));
+            
+            // If there is no code, hide the code box
+            if (!quizCode) {
+                codeBox.style.visibility = "hidden";
+            // If there is code, make sure it is displayed
+            } else {
+                codeBox.style.visibility = "visible";
+            }
+
+
             
             setCode(quizCode.replaceAll('\\n', '\n'));
 
