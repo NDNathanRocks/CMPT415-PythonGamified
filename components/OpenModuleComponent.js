@@ -191,7 +191,7 @@ function OpenModuleComponent(props) {
             var formQuestion = document.getElementById("quiz_question");
             var codeBox = document.getElementById("quiz_code");
             
-            const quizQuestion = questions[currentQuestion].question;
+            const quizQuestion = questions[currentQuestion].question.replaceAll('\\n', '\n');
             const quizCode = questions[currentQuestion].code;
             const quizAnswerOptions = questions[currentQuestion].answers;
             formQuestion.innerHTML = `${quizQuestion}`;
@@ -205,10 +205,6 @@ function OpenModuleComponent(props) {
             } else {
                 codeBox.style.visibility = "visible";
             }
-
-
-            
-            setCode(quizCode.replaceAll('\\n', '\n'));
 
             for (let i = 0; i < 6; i++) {
                 var currentLabel = document.getElementById(`label-${i}`);
