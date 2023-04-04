@@ -90,7 +90,6 @@ export default function HomePageComponent() {
         const theQuestions = getQuestionData(user)
         theQuestions.then(value => {
             setChallengeQuestion(value)
-            console.log(challengeQuestion.conditional_statements)
         })
     }, [])
 

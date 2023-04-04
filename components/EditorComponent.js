@@ -5,7 +5,6 @@ import axios from 'axios'
 import CheckOutputComponent from "./CheckOutputComponent"
 // import Modal from "./Modal"
 import { Modal } from "react-bootstrap"
-import ChallengeQuestionComponent from "./ChallengeQuestionComponent"
 import { getQuestionsList, updateScore, solvedQuestionUpdate, checkHintUsedAndUpdate, updateQuestionData, getQuestionData } from "../data/ChallengeQuestions"
 import { get } from "https"
 import Button from 'react-bootstrap/Button'

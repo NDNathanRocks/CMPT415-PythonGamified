@@ -5,4 +5,5 @@ export const Pages = {
     STUDENT_PROFILE: "student-profile",
     DISCUSSION: "discussion",
     EDITOR: "editor",
+    LEADERBOARD: "leaderboard",
 }
