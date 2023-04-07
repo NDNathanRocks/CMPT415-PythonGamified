@@ -5,9 +5,12 @@ import axios from 'axios'
 import CheckOutputComponent from "./CheckOutputComponent"
 // import Modal from "./Modal"
 import { Modal } from "react-bootstrap"
-import { getQuestionsList, updateScore, solvedQuestionUpdate, checkHintUsedAndUpdate, updateQuestionData, getQuestionData } from "../data/ChallengeQuestions"
+import { updateScore, solvedQuestionUpdate, checkHintUsedAndUpdate, updateQuestionData, getScore } from "../data/ChallengeQuestions"
 import { get } from "https"
 import Button from 'react-bootstrap/Button'
+import { getStudentScore } from '../data/Students'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 
 /**
  * The editor component for coding challenges.
@@ -20,10 +23,9 @@ export default function EditorComponent(props) {
         minimap: { enabled: false }
     }
     
-    const { challengeNumber, setChallengeNumber, challengeQuestion, user, openedModule, setToast } = useContext(Context)
+    const { challengeNumber, setChallengeNumber, challengeQuestion, challengeAnswer, user, score, setScore, openedModule, setToast } = useContext(Context)
     
     const moduleName = openedModule.replaceAll('-', '_')
-    console.log(moduleName);
 
     // State for the code's output
     const [output, setOutput] = useState(["# Your output will be displayed here\n"])
@@ -64,6 +66,14 @@ export default function EditorComponent(props) {
     useEffect (()=>{
         console.log("Editor Mounted!")
     }, [])
+
+    useEffect (()=>{
+        console.log("Hint Used!")
+        const theScore = getScore(user)
+        theScore.then(value => {
+            setScore(value)
+        })
+    }, [modalHintShow])
 
     /**
      * Runs the code and updates the output.
@@ -126,15 +136,15 @@ export default function EditorComponent(props) {
                     const s = b.toString('ascii')
                     setOutput([...output, s])
                     afterRun(s)
-                    challengeQuestion[moduleName].question_data[challengeNumber].output = s
+                    challengeAnswer[moduleName].question_data[challengeNumber].output = s
                 } else {
                     const s = ""
                     setOutput([...output, s])
                     afterRun(s)
-                    challengeQuestion[moduleName].question_data[challengeNumber].output = s
+                    challengeAnswer[moduleName].question_data[challengeNumber].output = s
                 }
-                challengeQuestion[moduleName].question_data[challengeNumber].mycode = editorVal
-                updateQuestionData(user, moduleName, challengeQuestion[moduleName].question_data)
+                challengeAnswer[moduleName].question_data[challengeNumber].mycode = editorVal
+                updateQuestionData(user, moduleName, challengeAnswer[moduleName].question_data)
                 setRunEnabled(true)
               }).catch(function (error) {
                 alert("Error: " + error)
@@ -149,8 +159,8 @@ export default function EditorComponent(props) {
     }
 
     const afterRun = async (s) => {
-        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === challengeQuestion[moduleName].question_data[challengeNumber].answer) {
-            if (challengeQuestion[moduleName].question_data[challengeNumber].completed == false) {
+        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].answer) {
+            if (challengeAnswer[moduleName].question_data[challengeNumber].completed == false) {
                 if (await solvedQuestionUpdate(user, moduleName, challengeNumber)) {
                     //increase score
                     updateScore(user, 50)
@@ -163,7 +173,7 @@ export default function EditorComponent(props) {
                         // message: "⭐ +50 score"
                     })
                     // setModalNextQuestionShow(true)
-                    challengeQuestion[moduleName].question_data[challengeNumber].completed = true
+                    challengeAnswer[moduleName].question_data[challengeNumber].completed = true
                 } else {
                     setToast({
                         title: "Good for trying again!",
@@ -185,8 +195,8 @@ export default function EditorComponent(props) {
     }
 
     useEffect(() => {
-        setOutput([challengeQuestion[moduleName].question_data[challengeNumber].output])
-        setEditorVal(challengeQuestion[moduleName].question_data[challengeNumber].mycode)
+        setOutput([challengeAnswer[moduleName].question_data[challengeNumber].output])
+        setEditorVal(challengeAnswer[moduleName].question_data[challengeNumber].mycode)
     }, [challengeNumber])
 
     /**
@@ -272,33 +282,31 @@ export default function EditorComponent(props) {
             </div>
         )
     }
-    const [editorVal, setEditorVal] = useState(challengeQuestion[moduleName].question_data[challengeNumber].mycode)
+    const [editorVal, setEditorVal] = useState(challengeAnswer[moduleName].question_data[challengeNumber].mycode)
     function handleEditorChange(value, event) {
         setEditorVal(value)
       }
 
     return (
-        <div class="codingchall">
-
-            <h1>Coding Challenge</h1>
-
-            <div className="editor-output">
-                <div className="output">
-                    <h5>Question {challengeNumber+1} - {challengeQuestion[moduleName].question_data[challengeNumber].title}</h5>
-                    <ul>
-                        {challengeQuestion[moduleName].question_data[challengeNumber].question}
-                    </ul>
-                    <Editor
-                        height="40vh"
-                        defaultLanguage="python"
-                        value={ challengeQuestion[moduleName].question_data[challengeNumber].mycode.replaceAll("\\n",'\n') }
-                        // defaultValue = {challengeQuestion[moduleName].question_data[challengeNumber].mycode}
-                        options={options}
-                        onMount={handleEditorDidMount}
-                        onChange={handleEditorChange}
-                    />
+            <div class="codingchall">
+                <h1>Coding Challenge</h1>
+                <div className="editor-output">
+                    <div className="output">
+                        <h5>Question {challengeNumber+1} - {challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].title}</h5>
+                        <ul>
+                            {challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].question}
+                        </ul>
+                        <Editor
+                            height="40vh"
+                            defaultLanguage="python"
+                            value={ challengeAnswer[moduleName].question_data[challengeNumber].mycode.replaceAll("\\n",'\n') }
+                            // defaultValue = {challengeAnswer[moduleName].question_data[challengeNumber].mycode}
+                            options={options}
+                            onMount={handleEditorDidMount}
+                            onChange={handleEditorChange}
+                        />
+                    </div>
                 </div>
-            </div>
 
             <p></p>
             
@@ -311,13 +319,15 @@ export default function EditorComponent(props) {
                         }
                     </ul>
                     <CheckOutputComponent output={output} moduleName={moduleName}/>
+                    <div className = "pointdescription"> You have {score} <FontAwesomeIcon icon="fa-solid fa-coins" /></div>
+                    <div className = "pointdescription"> 50 <FontAwesomeIcon icon="fa-solid fa-coins" /> are need to use a hint.</div>
                 </div>
                 <div class="btn-group btn-group-editor-run" role="group">
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>
                     <HintModal
                         show={modalHintShow}
                         title={challengeNumber + 1}
-                        body={challengeQuestion[moduleName].question_data[challengeNumber].hint}
+                        body={challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].hint}
                         onHide={() => setModalHintShow(false)}
                     />
                     <button type="button" className="btn btn-light" href="#" role="button" onClick={handleOpen}>Hint</button>

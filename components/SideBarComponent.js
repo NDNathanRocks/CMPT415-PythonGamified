@@ -16,10 +16,12 @@ import Context from '../context/Context'
 export default function SideBar(props) {
     library.add(fab, fas, far)
 
-    const { challengeNumber, setChallengeNumber, challengeQuestion } = useContext(Context)
+    const { challengeAnswer, setChallengeNumber, challengeQuestion, setEditorState } = useContext(Context)
     const moduleName = props.moduleName
 
-    const questionTopicsList = challengeQuestion[moduleName].question_data.map((question, i) => (
+    console.log(challengeQuestion.find(x => x.id === moduleName).questions);
+
+    const questionTopicsList = challengeQuestion.find(x => x.id === moduleName).questions.map((question, i) => (
         <NavItem eventKey={i}>
             <NavText>{question.title}</NavText>
         </NavItem> 
@@ -31,6 +33,7 @@ export default function SideBar(props) {
             onSelect={selected=> { 
                 if (selected == "quiz") {
                     props.sideOut("quiz")
+                    setEditorState(0)
                 } else {
                     props.sideOut("else")
                     setChallengeNumber(parseInt(selected))
@@ -47,7 +50,7 @@ export default function SideBar(props) {
                 <NavItem eventKey="comp">
                     <NavIcon><FontAwesomeIcon icon="fa-solid fa-brain" /></NavIcon>
                     <NavText>Challenge</NavText>
-                    {challengeQuestion[moduleName] && questionTopicsList}
+                    {challengeQuestion.find(x => x.id === moduleName) && questionTopicsList}
                     {/* {challengeQuestion[moduleName] ? questionTopicsList: null} */}
                 </NavItem>
             </SideNav.Nav>
