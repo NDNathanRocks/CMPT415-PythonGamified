@@ -8,7 +8,7 @@ function CheckOutputComponent(props) {
 
     const output = props.output;
     const moduleName = props.moduleName;
-    var ans = challengeQuestion[moduleName].question_data[challengeNumber].answer.toLowerCase().replace(/(\r\n|\n|\r)/gm, "");
+    var ans = challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].answer.toLowerCase().replace(/(\r\n|\n|\r)/gm, "");
    
     if (typeof output.at(-1) == 'string') {
         var userAns = output.at(-1).toLowerCase().replace(/(\r\n|\n|\r)/gm, "");
