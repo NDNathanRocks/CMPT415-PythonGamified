@@ -118,6 +118,7 @@ function OpenModuleComponent(props) {
         })
         handleModuleStart()
         getQuestions()
+        setEditorState(0)
     }, [])
 
     // Once questions have been loaded, then display in form

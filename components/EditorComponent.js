@@ -24,17 +24,16 @@ export default function EditorComponent(props) {
     }
     
     const { challengeNumber, setChallengeNumber, challengeQuestion, challengeAnswer, user, score, setScore, openedModule, setToast } = useContext(Context)
-    
+
     const moduleName = openedModule.replaceAll('-', '_')
+    const currentQuestion = challengeQuestion.find(x => x.id === moduleName).questions.find(x => x.id === challengeNumber)
+    const currentQuestionNumber = challengeQuestion.find(x => x.id === moduleName).questions.indexOf(challengeQuestion.find(x => x.id === moduleName).questions.find(x => x.id === challengeNumber)) + 1
 
     // State for the code's output
     const [output, setOutput] = useState(["# Your output will be displayed here\n"])
 
     // State for if the code can be ran right now
     const [runEnabled, setRunEnabled] = useState(true)
-
-    // State for the prompt
-    const [prompt, setPrompt] = useState()
 
     // For RunCode Error Message
     const [errorMessage, setErrorMessage] = useState("")
@@ -58,17 +57,12 @@ export default function EditorComponent(props) {
     const closeCodingChallenge = () => {
         setEditorState(0)
     }
-
-    // useEffect(() => {
-    //     // setPrompt(challengeData)
-        
-    // }, [])
+    
     useEffect (()=>{
         console.log("Editor Mounted!")
     }, [])
 
     useEffect (()=>{
-        console.log("Hint Used!")
         const theScore = getScore(user)
         theScore.then(value => {
             setScore(value)
@@ -159,7 +153,8 @@ export default function EditorComponent(props) {
     }
 
     const afterRun = async (s) => {
-        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].answer) {
+        challengeAnswer[moduleName].question_data[challengeNumber].active = true
+        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === currentQuestion.answer) {
             if (challengeAnswer[moduleName].question_data[challengeNumber].completed == false) {
                 if (await solvedQuestionUpdate(user, moduleName, challengeNumber)) {
                     //increase score
@@ -168,7 +163,7 @@ export default function EditorComponent(props) {
                         title: "Correct!",
                         message: <div>
                                     <p>⭐ +50 score</p>
-                                    <Button variant="success" size="sm" onClick={() => {setChallengeNumber(challengeNumber + 1)}}>Try Next Question</Button>
+                                    <Button variant="success" size="sm" onClick={() => {setChallengeNumber(currentQuestionNumber + 1)}}>Try Next Question</Button>
                                 </div>
                         // message: "⭐ +50 score"
                     })
@@ -218,7 +213,7 @@ export default function EditorComponent(props) {
             <Modal.Header closeButton>
                 <Modal.Title id="contained-modal-title-vcenter"> Hint - Question {props.title} </Modal.Title> 
             </Modal.Header>
-            <Modal.Body> <p>{props.body}</p> </Modal.Body>
+            <Modal.Body> <p dangerouslySetInnerHTML={{__html:props.body}}></p> </Modal.Body>
           </Modal>
         );
     }
@@ -286,20 +281,18 @@ export default function EditorComponent(props) {
     function handleEditorChange(value, event) {
         setEditorVal(value)
       }
-
+    
     return (
             <div class="codingchall">
                 <h1>Coding Challenge</h1>
                 <div className="editor-output">
                     <div className="output">
-                        <h5>Question {challengeNumber+1} - {challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].title}</h5>
-                        <ul>
-                            {challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].question}
-                        </ul>
+                        <h5>Question {currentQuestionNumber} - {currentQuestion.title}</h5>
+                        <ul dangerouslySetInnerHTML={{__html:currentQuestion.question}}></ul>
                         <Editor
                             height="40vh"
                             defaultLanguage="python"
-                            value={ challengeAnswer[moduleName].question_data[challengeNumber].mycode.replaceAll("\\n",'\n') }
+                            value={ challengeAnswer[moduleName].question_data[challengeNumber].active ? challengeAnswer[moduleName].question_data[challengeNumber].mycode : currentQuestion.startercode.replace(/\\n/g, "\n") }
                             // defaultValue = {challengeAnswer[moduleName].question_data[challengeNumber].mycode}
                             options={options}
                             onMount={handleEditorDidMount}
@@ -326,8 +319,8 @@ export default function EditorComponent(props) {
                     <button type="button" className={"btn btn-primary" + (runEnabled ? "" : " disabled" )} onClick={e => runCode(e)}>Run Code</button>
                     <HintModal
                         show={modalHintShow}
-                        title={challengeNumber + 1}
-                        body={challengeQuestion.find(x => x.id === moduleName).questions[challengeNumber].hint}
+                        title={currentQuestionNumber}
+                        body={currentQuestion.hint}
                         onHide={() => setModalHintShow(false)}
                     />
                     <button type="button" className="btn btn-light" href="#" role="button" onClick={handleOpen}>Hint</button>

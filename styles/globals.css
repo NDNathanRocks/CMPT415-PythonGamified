@@ -1,5 +1,12 @@
 @import url('../node_modules/font-awesome/css/font-awesome.min.css');
 
+
+.mysidenav-item {
+  display: grid;
+  grid-template-columns: 2fr 0.25fr 0.33fr;
+  /* grid-template-columns: 2fr 0.25fr 0.25fr; */
+}
+
 .header-block {
   text-align: center;
   padding-top: 40px;
@@ -61,7 +68,7 @@
 
 .mysidenav {
   background-color: grey !important;
-  margin-top: 3.5% !important;
+  margin-top: 3.7% !important;
 }
 
 .form-signin {
