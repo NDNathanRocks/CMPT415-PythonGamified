@@ -16,14 +16,19 @@ import Context from '../context/Context'
 export default function SideBar(props) {
     library.add(fab, fas, far)
 
-    const { challengeAnswer, setChallengeNumber, challengeQuestion, setEditorState } = useContext(Context)
+    const { challengeAnswer, setChallengeNumber, challengeNumber, challengeQuestion, setEditorState } = useContext(Context)
     const moduleName = props.moduleName
 
-    console.log(challengeQuestion.find(x => x.id === moduleName).questions);
 
-    const questionTopicsList = challengeQuestion.find(x => x.id === moduleName).questions.map((question, i) => (
-        <NavItem eventKey={i}>
-            <NavText>{question.title}</NavText>
+    const questionTopicsList = challengeQuestion.find(x => x.id === moduleName).questions.sort((a, b) => b.difficulty.localeCompare(a.difficulty)).map((question, i) => (
+        <NavItem eventKey={question.id}>
+            <NavText>
+                <div className='mysidenav-item'>
+                    <span>{question.title}</span>
+                    <span>{question.difficulty}</span>
+                    { challengeAnswer[moduleName].question_data.find(x => x.id === question.id).completed ? <span>✅</span> : <span>❌</span>}
+                </div>
+            </NavText>
         </NavItem> 
     ))
     
