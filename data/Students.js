@@ -40,12 +40,14 @@ const studentConverter = {
             friends: student.friends,
             score: student.score,
             solved_question : student.solved_question,
-            question_hint: student.question_hint
+            question_hint: student.question_hint,
+            last_visited: student.last_visited,
+            attendance_streak: student.attendance_streak
         }
     },
     fromFirestore: function (snapshot, options) {
         const data = snapshot.data(options)
-        return new Student(data.uuid, data.name, data.email, data.anonymous_name, data.is_anonymous, data.achievements, data.level, data.friends, data.score, data.solved_question, data.question_hint)
+        return new Student(data.uuid, data.name, data.email, data.anonymous_name, data.is_anonymous, data.achievements, data.level, data.friends, data.score, data.solved_question, data.question_hint, data.last_visited, data.attendance_streak)
     }
 }
 
@@ -376,6 +378,88 @@ export async function questionHintCheck(student, title, questionNumber) {
     }
 
     return false
+}
+
+/**
+ * Check when student last logged in
+ * @param {Student} student 
+ * @returns {String} date of students' last visit to the site
+ */
+export async function getDateLastVisited(student) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+    const studentData = studentDoc.data()
+
+    return String(studentData.last_visited)
+}
+
+/**
+ * Update when student last logged in
+ * @param {Student} student 
+ * @returns {Boolean} true if date was successfully updated, false otherwise
+ */
+export async function setDateLastVisited(student, newDate) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    // Update firebase with changes
+    await updateDoc(studentDoc.ref, { last_visited: newDate })
+
+    return true
+}
+
+/**
+ * Get student's attendance streak
+ * @param {Student} student 
+ * @returns {String} date of students' last visit to the site
+ */
+export async function getAttendanceStreak(student) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+    const studentData = studentDoc.data()
+
+    return studentData.attendance_streak
+}
+
+/**
+ * Update a student's attendance streak
+ * @param {Student} student 
+ * @returns {Boolean} true if streak was successfully updated, false otherwise
+ */
+export async function setAttendanceStreak(student, newStreak) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+
+    // Update firebase with changes
+    await updateDoc(studentDoc.ref, { attendance_streak: newStreak })
+
+    return true
 }
 
 
