@@ -71,8 +71,6 @@ function OpenModuleComponent(props) {
     // Context: user, editor state, challenge data, personalization, toast
     const { user, page, setPage, setEditorState, setChallengeData, challengeData, personalization, setPersonalization, setToast, setOpenedModule } = useContext(Context)
 
-    setOpenedModule(props.title.replaceAll("-", "_"))
-
     const currentScore = getStudentScore(user)
 
     // State for the module's contents
