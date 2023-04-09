@@ -88,6 +88,9 @@ function OpenModuleComponent(props) {
     // State for incorrect questions
     const [wrongQuestions, setWrongQuestions] = useState(0)
 
+    // State for number of correct questions in a row
+    const [answerStreak, setAnswerStreak] = useState(0)
+
     // State for personalization (lecture visibility, etc.)
     const [showPersonalization, setShowPersonalization] = useState(null)
 
@@ -143,21 +146,34 @@ function OpenModuleComponent(props) {
 
             var setDisable = false;
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
+                var bonusCoins = answerStreak * 5
+                
+                // Standard amount of coins given is 10
+                var coinsAwarded = 10
+
+                // Max amount of bonus coins (from answer streaks) is 20
+                if (bonusCoins >= 20) {
+                    bonusCoins = 20
+                }
+
+                coinsAwarded += bonusCoins
+
+                setAnswerStreak(answerStreak+1)
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
                 checked.then(value => {
-                    // If question has never been solved before, give points and update question status
+                    // If question has never been solved before, give coins and update question status
                     if(!value) {
-                        giveStudentScore(user, 50)
+                        giveStudentScore(user, coinsAwarded)
                         solvedQuestionUpdate(user, moduleName, currentQuestion, true)
                         setToast({
                             title: "Correct!",
-                            message: "⭐ +50 score"
+                            message: `+${coinsAwarded} score \n Answer Streak: ${answerStreak + 1}🔥`
                         })
                     }
                     else {
                         setToast({
                             title: "Good for trying again!",
-                            message: "Let's Go!😀"
+                            message: `Answer Streak: ${answerStreak + 1}🔥`
                         })
                     }
                 })
