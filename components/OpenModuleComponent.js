@@ -1,6 +1,6 @@
 import { useEffect, useState, useContext, memo } from 'react'
 import { Modal } from "react-bootstrap";
-import { giveStudentScore, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate } from '../data/Students'
+import { giveStudentScore, solvedQuestionCheck, solvedQuestionUpdate, getStudentScore, takeStudentScore, questionHintCheck, questionHintUpdate, getModuleBonus, moduleBonusReceived } from '../data/Students'
 import { getAllModuleQuestions } from '../data/QuizQuestions'
 import { getPersonalization } from "../data/Personalization"
 import { useFormik } from 'formik'
@@ -100,6 +100,12 @@ function OpenModuleComponent(props) {
     // State for the current hint for the multiple choice question
     const [hint, setHint] = useState('')
 
+    // State for the module bonus award amount
+    const [bonusAward, setBonusAward] = useState(0)
+
+    // State for whether the module bonus award has previously been received
+    const [bonusReceived, setBonusReceived] = useState(false)
+
     // State for the the visibility of the hint modal
     const [hintModalShow, setHintModalShow] = useState(false);
 
@@ -119,6 +125,7 @@ function OpenModuleComponent(props) {
         })
         handleModuleStart()
         getQuestions()
+        getModuleBonusInfo()
         setEditorState(0)
     }, [])
 
@@ -184,6 +191,17 @@ function OpenModuleComponent(props) {
                 if (currentQuestion >= (questions.length - 1)) {
                     setDisable = true;
                     setCompletedModalShow(true)
+
+                    // If bonus has not been received before, give the student their bonus for completing the module
+                    if (!bonusReceived) {
+                        setToast({
+                            title: "Module Completion Bonus",
+                            message: `+${bonusAward} score`
+                        })
+                        giveStudentScore(user, bonusAward)
+                        moduleBonusReceived(user, moduleName)
+                    }
+
                 }
             } else if (pick !== ''){
                 if (values.options.length > 2) {
@@ -237,6 +255,18 @@ function OpenModuleComponent(props) {
             setHint(questions[currentQuestion].hint)
             
         }
+    }
+
+    const getModuleBonusInfo= () => {
+        getModuleBonus(user, moduleName).then(bonusObj => {
+            setBonusAward(bonusObj.award)
+
+            var bonusState = true
+            if (bonusObj.received === 0) {
+                bonusState = false
+            }
+            setBonusReceived(bonusState)
+        })
     }
 
     /**
