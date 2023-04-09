@@ -88,6 +88,9 @@ function OpenModuleComponent(props) {
     // State for incorrect questions
     const [wrongQuestions, setWrongQuestions] = useState(0)
 
+    // State for number of correct questions in a row
+    const [answerStreak, setAnswerStreak] = useState(0)
+
     // State for personalization (lecture visibility, etc.)
     const [showPersonalization, setShowPersonalization] = useState(null)
 
@@ -143,21 +146,23 @@ function OpenModuleComponent(props) {
 
             var setDisable = false;
             if (pick === String(questions[currentQuestion].correctAnswerIndex)) {
+                var pointsAwarded = 10 + (answerStreak * 5)
+                setAnswerStreak(answerStreak+1)
                 setCurrentExplanation("✓ " + questions[currentQuestion].explanation)
                 checked.then(value => {
                     // If question has never been solved before, give points and update question status
                     if(!value) {
-                        giveStudentScore(user, 50)
+                        giveStudentScore(user, pointsAwarded)
                         solvedQuestionUpdate(user, moduleName, currentQuestion, true)
                         setToast({
                             title: "Correct!",
-                            message: "⭐ +50 score"
+                            message: `+${pointsAwarded} score \n Answer Streak: ${answerStreak + 1}🔥`
                         })
                     }
                     else {
                         setToast({
                             title: "Good for trying again!",
-                            message: "Let's Go!😀"
+                            message: `Answer Streak: ${answerStreak + 1}🔥`
                         })
                     }
                 })
