@@ -19,7 +19,8 @@ export class Student {
         this.friends = friends
         this.score = score
         this.solved_question = []
-        this.question_hint = []
+        this.question_hint = [],
+        this.module_bonus = {}
     }
 }
 
@@ -462,6 +463,59 @@ export async function setAttendanceStreak(student, newStreak) {
     return true
 }
 
+/**
+ * Get module bonus information: bonus amount and whether it has already been received
+ * @param {Student} student 
+ * @param {String} title
+ * @returns {Object} [award, received]
+ */
+export async function getModuleBonus(student, title) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return null
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+    const studentData = studentDoc.data()
+
+    const currentModule = studentData.module_bonus
+
+    return currentModule[title]
+
+}
+
+/**
+ * Update the module bonus to set it to having been received
+ * @param {Student} student 
+ * @param {String} title
+ * @returns {Boolean} If bonus information is successfully updated
+ */
+export async function moduleBonusReceived(student, title) {
+    const q = query(collection(db, "students"), where("email", "==", student.email))
+
+    const querySnapshot = await getDocs(q)
+
+    if (querySnapshot.empty) {
+        return false
+    }
+
+    const studentDoc = querySnapshot.docs[0]
+    const studentData = studentDoc.data()
+
+    const currentModule = studentData.module_bonus
+
+    // Set the module bonus to having been received
+    currentModule[title]["received"] = 1
+
+    // Update firebase with changes
+    await updateDoc(studentDoc.ref, { module_bonus: currentModule })
+
+    return true
+
+}
 
 
 /**
