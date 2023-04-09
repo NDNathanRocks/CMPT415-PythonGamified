@@ -118,6 +118,7 @@ function OpenModuleComponent(props) {
         })
         handleModuleStart()
         getQuestions()
+        setEditorState(0)
     }, [])
 
     // Once questions have been loaded, then display in form
@@ -378,17 +379,11 @@ function OpenModuleComponent(props) {
     }
 
     return (
-        <div class="d-flex flex-row">
-            <div>
-                <div class="bg-primary text-dark bg-opacity-25 rounded ps-2 pt-4 me-5 mb-4">
-                    <div>
-                        <div class="d-flex flex-row justify-content-between rounded sidebar_row px-4 py-2"  id="menu2">
-                            <SideBar sideOut={sideOut} moduleName={moduleName.replaceAll('-', '_')}/>
-                        </div>
-                    </div>
+        <div class="d-flex flex-row flex-grow-1">
+            <SideBar sideOut={sideOut} moduleName={moduleName.replaceAll('-', '_')}/>
+            <div class="bg-primary text-dark bg-opacity-25 rounded ps-2 pt-4 me-5 mb-4">
                 <div id = "quiz_list" class = "quiz_list3">
                 </div> 
-                </div>
             </div>
             <div className="row flex-grow-1" id="quiz_box">  
                 <div className = "quiz_box">

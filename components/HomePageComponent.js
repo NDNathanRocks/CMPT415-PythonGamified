@@ -16,13 +16,14 @@ import LeaderboardComponent from './LeaderboardComponent'
 import { Modal } from "react-bootstrap"
 import { db } from '../firebase'
 import { collection, query, where, getDocs, getDoc, setDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
-import { getQuestionsList, updateScore, solvedQuestionUpdate, checkHintUsedAndUpdate, updateQuestionData, getQuestionData } from "../data/ChallengeQuestions"
+import { getAnswer, getQuestion, getScore } from "../data/ChallengeQuestions"
 
 // import { getQuestionsList } from "../data/ChallengeQuestions"
 
 export default function HomePageComponent() {
     library.add(fab, fas, far)
-    const { openedModule, setOpenedModule, editorState, setChallengeQuestion, challengeQuestion, user, setToast } = useContext(Context)
+    const { openedModule, setOpenedModule, editorState, setChallengeQuestion, challengeQuestion, user, setScore, setChallengeAnswer, setToast } = useContext(Context)
+    
     const chalQuestionsRef = collection(db, "quiz-questions/conditional-statements/challenge")
 
     const currentScore = getStudentScore(user)
@@ -86,12 +87,22 @@ export default function HomePageComponent() {
         // readFireBaseData();
         console.log("Home Page Mounted!")
         setChallengeQuestion([])
+        setChallengeAnswer([])
         console.log("Reading Data from Firebase");
-        const theQuestions = getQuestionData(user)
+        const theQuestions = getQuestion()
         theQuestions.then(value => {
             setChallengeQuestion(value)
         })
+
         updateAttendance()
+        const theAnswers = getAnswer(user)
+        theAnswers.then(value => {
+            setChallengeAnswer(value)
+        })
+        const theScore = getScore(user)
+        theScore.then(value => {
+            setScore(value)
+        })
     }, [])
 
     /*
@@ -182,9 +193,7 @@ export default function HomePageComponent() {
             return (<></>)
         } else if (editorState === 1) {
             return (
-                <div className="" style={{right: 0}}>
-                    <EditorComponent />
-                </div>
+                <EditorComponent />
             )
         } else if (editorState === 2) {
             return (
@@ -238,9 +247,7 @@ export default function HomePageComponent() {
     if (openedModule) {
         return (
             <div class="d-flex flex-row justify-content-between">
-                <div className={editorState === 0 ? "flex-grow-1 col-100" : "flex-grow-1 col-7"}>
-                    <OpenModuleComponent title={openedModule} />
-                </div>
+                <OpenModuleComponent title={openedModule} />
                 {getEditor()}
                 <div className="px-5 mt-5">
                     <BadgesComponent></BadgesComponent>

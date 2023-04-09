@@ -16,12 +16,19 @@ import Context from '../context/Context'
 export default function SideBar(props) {
     library.add(fab, fas, far)
 
-    const { challengeNumber, setChallengeNumber, challengeQuestion } = useContext(Context)
+    const { challengeAnswer, setChallengeNumber, challengeNumber, challengeQuestion, setEditorState } = useContext(Context)
     const moduleName = props.moduleName
 
-    const questionTopicsList = challengeQuestion[moduleName].question_data.map((question, i) => (
-        <NavItem eventKey={i}>
-            <NavText>{question.title}</NavText>
+
+    const questionTopicsList = challengeQuestion.find(x => x.id === moduleName).questions.sort((a, b) => b.difficulty.localeCompare(a.difficulty)).map((question, i) => (
+        <NavItem eventKey={question.id}>
+            <NavText>
+                <div className='mysidenav-item'>
+                    <span>{question.title}</span>
+                    <span>{question.difficulty}</span>
+                    { challengeAnswer[moduleName].question_data.find(x => x.id === question.id).completed ? <span>✅</span> : <span>❌</span>}
+                </div>
+            </NavText>
         </NavItem> 
     ))
     
@@ -31,6 +38,7 @@ export default function SideBar(props) {
             onSelect={selected=> { 
                 if (selected == "quiz") {
                     props.sideOut("quiz")
+                    setEditorState(0)
                 } else {
                     props.sideOut("else")
                     setChallengeNumber(parseInt(selected))
@@ -47,7 +55,7 @@ export default function SideBar(props) {
                 <NavItem eventKey="comp">
                     <NavIcon><FontAwesomeIcon icon="fa-solid fa-brain" /></NavIcon>
                     <NavText>Challenge</NavText>
-                    {challengeQuestion[moduleName] && questionTopicsList}
+                    {challengeQuestion.find(x => x.id === moduleName) && questionTopicsList}
                     {/* {challengeQuestion[moduleName] ? questionTopicsList: null} */}
                 </NavItem>
             </SideNav.Nav>

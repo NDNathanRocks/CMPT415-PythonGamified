@@ -32,7 +32,10 @@ export default function Home() {
 
   const [challengeNumber, setChallengeNumber] = useState(0)
   const [challengeQuestion, setChallengeQuestion] = useState({})
+  const [challengeAnswer, setChallengeAnswer] = useState({})
+  const [score, setScore] = useState(200)
 
+  
   const contexts = {
     user,
     setUser,
@@ -53,7 +56,11 @@ export default function Home() {
     challengeNumber,
     setChallengeNumber,
     challengeQuestion, 
-    setChallengeQuestion
+    setChallengeQuestion,
+    challengeAnswer, 
+    setChallengeAnswer,
+    score,
+    setScore
   }
 
   useEffect(() => {

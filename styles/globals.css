@@ -1,5 +1,12 @@
 @import url('../node_modules/font-awesome/css/font-awesome.min.css');
 
+
+.mysidenav-item {
+  display: grid;
+  grid-template-columns: 2fr 0.25fr 0.33fr;
+  /* grid-template-columns: 2fr 0.25fr 0.25fr; */
+}
+
 .header-block {
   text-align: center;
   padding-top: 40px;
@@ -51,12 +58,17 @@
 }
 
 .codingchall {
-  margin-left: -1500px;
+  margin-left: 2%;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 1;
+  flex-grow: 1;
+  justify-content: space-between;
 }
 
 .mysidenav {
   background-color: grey !important;
-  margin-top: 5% !important;
+  margin-top: 3.7% !important;
 }
 
 .form-signin {
@@ -209,6 +221,7 @@
 
 .editor-output .output ul li {
   list-style-type: none;
+  flex-grow: 1;
 }
 
 .editor-output .output ul {

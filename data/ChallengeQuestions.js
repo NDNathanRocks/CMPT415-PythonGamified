@@ -12,8 +12,8 @@ export function ChallengeQuestions() {
 /**
  * Returns output for setChallengeQuestion()
  */
-export async function getQuestionsList() {
-    const ref = collection(db, "quiz-questions/conditional-statements/challenge")
+export async function getQuestion() {
+    const ref = collection(db, "challenge_questions/")
     const data = await getDocs(ref);
     const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id}));
     return(filteredData);
@@ -22,7 +22,7 @@ export async function getQuestionsList() {
 /**
  * Get Data from Student
  */
-export async function getQuestionData(student) {
+export async function getAnswer(student) {
   const ref = collection(db, "students")
   const q = query(ref, where("email", "==", student.email))
   const querySnapshot = await getDocs(q)
@@ -33,10 +33,27 @@ export async function getQuestionData(student) {
 
   const studentDoc = querySnapshot.docs[0]
   const studentData = studentDoc.data()
-  const currentQuestion = studentData.challenge_questions
-  
-  const theData = currentQuestion.modules
-  return theData
+  const currentQuestion = studentData.challenge_questions.modules
+
+  return currentQuestion
+};
+
+/**
+ * Get Score
+ */
+export async function getScore(student) {
+  const ref = collection(db, "students")
+  const q = query(ref, where("email", "==", student.email))
+  const querySnapshot = await getDocs(q)
+
+  if (querySnapshot.empty) {
+      return false
+  }
+  const studentDoc = querySnapshot.docs[0]
+  const studentData = studentDoc.data()
+  const currentScore = studentData.score
+
+  return currentScore
 };
 
 /**
@@ -106,6 +123,29 @@ export async function updateQuestionData(student, title, theData) {
   return true
 };
 
+// /**
+//  * Run when student runs their code
+//  */
+// export async function updateQuestionData(student, title, theData) {
+//   const ref = collection(db, "quiz_questions")
+//   const querySnapshot = await getDocs(ref)
+
+//   if (querySnapshot.empty) {
+//       return false
+//   }
+
+//   const studentDoc = querySnapshot.docs[0]
+//   const studentData = studentDoc.data()
+//   const currentQuestion = studentData.conditional_statements
+  
+//   currentQuestion.challenge = theData
+
+//   console.log(theData);
+
+//   // Update firebase with changes
+//   await updateDoc(studentDoc.ref, { challenge_questions: currentQuestion })
+//   return true
+// };
 
 /**
  * Run when student solves a question
