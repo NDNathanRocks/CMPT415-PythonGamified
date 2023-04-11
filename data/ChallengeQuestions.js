@@ -120,6 +120,7 @@ export async function updateQuestionData(student, title, theData) {
 
   // Update firebase with changes
   await updateDoc(studentDoc.ref, { challenge_questions: currentQuestion })
+  console.log("Updated Question Data to Firebase");
   return true
 };
 
@@ -173,5 +174,41 @@ export async function checkHintUsedAndUpdate(student, title, questionNumber) {
 
   // Update firebase with changes
   await updateDoc(studentDoc.ref, { challenge_questions: currentQuestion })
+  return false
+};
+
+
+/**
+ * Run when student solves a question
+ * Returns true if completed and added points... else returns false
+ */
+export async function checkAllCompleted(student, title) {
+  const ref = collection(db, "students")
+  const q = query(ref, where("email", "==", student.email))
+  const querySnapshot = await getDocs(q)
+
+  if (querySnapshot.empty) {
+      return false
+  }
+
+  const studentDoc = querySnapshot.docs[0]
+  const studentData = studentDoc.data()
+  const currentQuestion = studentData.challenge_questions
+
+  // Check if questions are all completed
+  for (let i = 0 ; i < currentQuestion.modules[title].question_data.length ; i++) {
+    // If something isn't completed return false
+    if (currentQuestion.modules[title].question_data[i].completed == false) {return false}
+  }
+  
+  // Check if already received
+  if (!currentQuestion.modules[title].bonusReceived) {
+    currentQuestion.modules[title].bonusReceived = true
+    updateScore(student, 67)
+    // Update firebase with changes
+    await updateDoc(studentDoc.ref, { challenge_questions: currentQuestion })
+    return true
+  }
+
   return false
 };
