@@ -5,11 +5,12 @@ import axios from 'axios'
 import CheckOutputComponent from "./CheckOutputComponent"
 // import Modal from "./Modal"
 import { Modal } from "react-bootstrap"
-import { updateScore, solvedQuestionUpdate, checkHintUsedAndUpdate, updateQuestionData, getScore } from "../data/ChallengeQuestions"
+import { updateScore, solvedQuestionUpdate, checkHintUsedAndUpdate, updateQuestionData, getScore, checkAllCompleted } from "../data/ChallengeQuestions"
 import { get } from "https"
 import Button from 'react-bootstrap/Button'
 import { getStudentScore } from '../data/Students'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Pages } from '../context/Pages'
 
 
 /**
@@ -23,11 +24,15 @@ export default function EditorComponent(props) {
         minimap: { enabled: false }
     }
     
-    const { challengeNumber, setChallengeNumber, challengeQuestion, challengeAnswer, user, score, setScore, openedModule, setToast } = useContext(Context)
+    const { challengeNumber, setChallengeNumber, challengeQuestion, challengeAnswer, user, score, setScore, openedModule, setOpenedModule, setToast, setPage } = useContext(Context)
 
     const moduleName = openedModule.replaceAll('-', '_')
     const currentQuestion = challengeQuestion.find(x => x.id === moduleName).questions.find(x => x.id === challengeNumber)
     const currentQuestionNumber = challengeQuestion.find(x => x.id === moduleName).questions.indexOf(challengeQuestion.find(x => x.id === moduleName).questions.find(x => x.id === challengeNumber)) + 1
+    let nextQuestionNumber = -1
+    if (challengeQuestion.find(x => x.id === moduleName).questions[currentQuestionNumber]) {
+        nextQuestionNumber = challengeQuestion.find(x => x.id === moduleName).questions[currentQuestionNumber].id
+    }
 
     // State for the code's output
     const [output, setOutput] = useState(["# Your output will be displayed here\n"])
@@ -39,6 +44,7 @@ export default function EditorComponent(props) {
     const [errorMessage, setErrorMessage] = useState("")
     const [modalHintShow, setModalHintShow] = useState(false);
     const [modalErrShow, setModalErrShow] = useState(false);
+    const [modalModuleCompletedShow, setModalModuleCompletedShow] = useState(false);
     // const [modalNextQuestionShow, setModalNextQuestionShow] = useState(false);
 
     // Context used: editor state
@@ -112,7 +118,7 @@ export default function EditorComponent(props) {
                 }
               }
               
-              axios.request(getOptions).then(function (response2) {
+              axios.request(getOptions).then( async function (response2) {
                 // Receive output and update state
                 const err = response2.data.stderr
                 if (err) {
@@ -129,16 +135,19 @@ export default function EditorComponent(props) {
                     const b = Buffer.from(out, 'base64')
                     const s = b.toString('ascii')
                     setOutput([...output, s])
-                    afterRun(s)
+                    await afterRun(s)
                     challengeAnswer[moduleName].question_data[challengeNumber].output = s
                 } else {
                     const s = ""
                     setOutput([...output, s])
-                    afterRun(s)
+                    await afterRun(s)
                     challengeAnswer[moduleName].question_data[challengeNumber].output = s
                 }
                 challengeAnswer[moduleName].question_data[challengeNumber].mycode = editorVal
-                updateQuestionData(user, moduleName, challengeAnswer[moduleName].question_data)
+                await updateQuestionData(user, moduleName, challengeAnswer[moduleName].question_data)
+                if (await checkAllCompleted(user, moduleName)) {
+                    setModalModuleCompletedShow(true)
+                }
                 setRunEnabled(true)
               }).catch(function (error) {
                 alert("Error: " + error)
@@ -154,7 +163,7 @@ export default function EditorComponent(props) {
 
     const afterRun = async (s) => {
         challengeAnswer[moduleName].question_data[challengeNumber].active = true
-        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === currentQuestion.answer) {
+        if (s.toLowerCase().replace(/(\r\n|\n|\r)/gm, "") === currentQuestion.answer.toLowerCase().replace(/(\r\n|\n|\r)/gm, "")) {
             if (challengeAnswer[moduleName].question_data[challengeNumber].completed == false) {
                 if (await solvedQuestionUpdate(user, moduleName, challengeNumber)) {
                     //increase score
@@ -163,11 +172,9 @@ export default function EditorComponent(props) {
                         title: "Correct!",
                         message: <div>
                                     <p>⭐ +50 score</p>
-                                    <Button variant="success" size="sm" onClick={() => {setChallengeNumber(currentQuestionNumber + 1)}}>Try Next Question</Button>
+                                    { nextQuestionNumber != -1 ? <Button variant="success" size="sm" onClick={() => {setChallengeNumber(nextQuestionNumber)}}>Try Next Question</Button> : <></>}
                                 </div>
-                        // message: "⭐ +50 score"
                     })
-                    // setModalNextQuestionShow(true)
                     challengeAnswer[moduleName].question_data[challengeNumber].completed = true
                 } else {
                     setToast({
@@ -186,7 +193,7 @@ export default function EditorComponent(props) {
                 title: "Incorrect!",
                 message: "Sorry that did not match our expected output. Please try again! 😀"
             })
-        } 
+        }
     }
 
     useEffect(() => {
@@ -232,6 +239,39 @@ export default function EditorComponent(props) {
             <Modal.Body> <p>{props.body}</p> </Modal.Body>
             </Modal>
         );
+    }
+
+    /**
+     * Handles a module being opened.
+     * @param {*} e 
+     */
+    const handleModulesClick = (e) => {
+        e.preventDefault()
+        setOpenedModule(null)
+        setPage(Pages.MODULES)
+    }
+
+    function ModuleCompletedModal(props) { 
+        return (
+            <Modal
+              {...props}
+              size="lg"
+              aria-labelledby="contained-modal-title-vcenter"
+              centered
+            >
+              <Modal.Header closeButton>
+                <Modal.Title id="contained-modal-title-vcenter">
+                  <h2 class="mt-3">🎉 Congratulations! 🎉</h2>
+                </Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <h5>You have completed all challenge questions in the <b>{props.title}</b> module!</h5>
+                <p>⭐ +67 score</p>
+                <p>You can redo these questions at any time for review.</p>
+                <Button variant="success" onClick={handleModulesClick}>Try Another Module!</Button>   
+              </Modal.Body>
+            </Modal>
+          );
     }
 
     // function NextQuestionModal(props) {        
@@ -329,6 +369,11 @@ export default function EditorComponent(props) {
                         title={challengeNumber + 1}
                         body={deduceErrorMessage()}
                         onHide={() => setModalErrShow(false)}
+                    />
+                    <ModuleCompletedModal
+                        show={modalModuleCompletedShow}
+                        title={moduleName}
+                        onHide={() => setModalModuleCompletedShow(false)}
                     />
                     {/* <NextQuestionModal
                         show={modalNextQuestionShow}
