@@ -257,6 +257,9 @@ function OpenModuleComponent(props) {
         }
     }
 
+    /**
+     * Asynchronously get information about end of module bonus
+     */
     const getModuleBonusInfo= () => {
         getModuleBonus(user, moduleName).then(bonusObj => {
             setBonusAward(bonusObj.award)
@@ -423,7 +426,7 @@ function OpenModuleComponent(props) {
     }
 
     return (
-        <div class="d-flex flex-row flex-grow-1">
+        <div class="d-flex flex-row flex-grow-1 ms-5">
             <SideBar sideOut={sideOut} moduleName={moduleName.replaceAll('-', '_')}/>
             <div class="bg-primary text-dark bg-opacity-25 rounded ps-2 pt-4 me-5 mb-4">
                 <div id = "quiz_list" class = "quiz_list3">
