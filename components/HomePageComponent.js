@@ -8,14 +8,12 @@ import { useContext } from 'react'
 import React, { useState, useEffect } from 'react';
 import { getStudentScore, giveStudentScore, setDateLastVisited, setAttendanceStreak, getDateLastVisited, getAttendanceStreak } from '../data/Students'
 import Context from '../context/Context'
-import RecentActivityComponent from './RecentActivityComponent'
 import OpenModuleComponent from './OpenModuleComponent'
 import EditorComponent from './EditorComponent'
 import EasyEditorComponent from './EasyEditorComponent'
-import LeaderboardComponent from './LeaderboardComponent'
 import { Modal } from "react-bootstrap"
 import { db } from '../firebase'
-import { collection, query, where, getDocs, getDoc, setDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection} from 'firebase/firestore'
 import { getAnswer, getQuestion, getScore } from "../data/ChallengeQuestions"
 
 // import { getQuestionsList } from "../data/ChallengeQuestions"
@@ -29,66 +27,8 @@ export default function HomePageComponent() {
     const currentScore = getStudentScore(user)
 
     useEffect(() => {
-        // get questions from firebase:
-        const readFireBaseData = () => {
-
-            // const getQuestionsList = async() => {
-            //     const data = await getDocs(chalQuestionsRef);
-            //     const filteredData = data.docs.map((doc) => ({...doc.data(), id: doc.id}));
-            //     // const replacedData = JSON.parse(JSON.stringify(filteredData).replaceAll("/\\n/g",'\n'));
-            //     // console.log(replacedData);
-            //     setChallengeQuestion(filteredData);
-            // };
-            
-            // const qlist = getQuestionsList()
-            // setChallengeQuestion(qlist)
-            // getQuestionsList()
-
-            // setChallengeQuestion([
-            //     {question: "Write a program that prints 'x' if the number inside the variable 'x' is greater than 5.",
-            //         answer: "7",
-            //         hint: "Use an if statement to check if x > 5, this way you can compare x with the number 5 and see if its greater than or not.\nThen you can use the print statment inside the if statement by creating an indentation in the next line.",
-            //         title: "If Statement (easy)",
-            //         output: "my old output1 goes here",
-            //         completed: false,
-            //         starterCode: "x = 7\n",
-            //         mycode: "# Use this variable to check your output\nx = 7\n# Write your code here\n"
-            //     },
-            //     {question: "For Loop Question 2",
-            //         answer: "me2",
-            //         hint: "hint2",
-            //         title: "If Statement (med)",
-            //         output: "my old output2 goes here",
-            //         completed: false,
-            //         starterCode: "x = 8\n",
-            //         mycode: "# Write your code here\n"
-            //     },
-            //     {question: "Nested For Loop Question 3",
-            //         answer: "me3",
-            //         hint: "hint3",
-            //         title: "If Statement (hard)",
-            //         output: "my old output3 goes here",
-            //         completed: false,
-            //         starterCode: "y = 7\n",
-            //         mycode: "# Write your code here\n"
-            //     },
-            //     {question: "Largest Number Question 4 big quesion goes here",
-            //         answer: "me4",
-            //         hint: "hint4",
-            //         title: "While Loop (easy)",
-            //         output: "my old output4 goes here",
-            //         completed: true,
-            //         starterCode: "x = 700\n",
-            //         mycode: "# Write your code here\n"
-            //     },
-            // ])
-        }
-
-        // readFireBaseData();
-        console.log("Home Page Mounted!")
         setChallengeQuestion([])
         setChallengeAnswer([])
-        console.log("Reading Data from Firebase");
         const theQuestions = getQuestion()
         theQuestions.then(value => {
             setChallengeQuestion(value)
